@@ -19,13 +19,13 @@
 	{
 	    "description": "The name of the database user.",
 	    "name": "DATABASE_USERNAME",
-	    "from": "[a-f0-9]{8}",
+	    "from": "user[a-f0-9]{8}",
 	    "generate": "expression"
 	},
 	{
 	    "description": "The password for the database user.",
 	    "name": "DATABASE_PASSWORD",
-	    "from": "[a-f0-9]{8}",
+	    "from": "[a-f0-9]{12}",
 	    "generate": "expression"
 	}
     ],
