@@ -19,11 +19,11 @@ fi
 if [ ! -f wp-config.php ]; then
     cp wp-config-sample.php wp-content/wp-config-temp.php
 
-    sed -i "s/'DB_NAME', 'database_name_here'/'DB_NAME', '$MYSQL_DATABASE'/"
-    sed -i "s/'DB_USER', 'username_here'/'DB_USER', '$MYSQL_USER'/"
-    sed -i "s/'DB_PASSWORD', 'password_here'/'DB_PASSWORD', '$MYSQL_PASSWORD'/"
-    sed -i "s/'DB_HOST', 'localhost'/'DB_HOST', '$MYSQL_HOST'/"
-    sed -i "s/\$table_prefix  = 'wp_';/\$table_prefix  = '$MYSQL_TABLE_PREFIX';/"
+    sed -i "s/'DB_NAME', 'database_name_here'/'DB_NAME', '$MYSQL_DATABASE'/" wp-content/wp-config-temp.php
+    sed -i "s/'DB_USER', 'username_here'/'DB_USER', '$MYSQL_USER'/" wp-content/wp-config-temp.php
+    sed -i "s/'DB_PASSWORD', 'password_here'/'DB_PASSWORD', '$MYSQL_PASSWORD'/" wp-content/wp-config-temp.php
+    sed -i "s/'DB_HOST', 'localhost'/'DB_HOST', '$MYSQL_HOST'/" wp-content/wp-config-temp.php
+    sed -i "s/\$table_prefix  = 'wp_';/\$table_prefix  = '$MYSQL_TABLE_PREFIX';/" wp-content/wp-config-temp.php
 
     mv wp-content/wp-config-temp.php wp-content/wp-config.php
 fi
