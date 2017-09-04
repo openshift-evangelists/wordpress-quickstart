@@ -18,4 +18,5 @@ tar cvf wp-content.tar wp-content
 # Edit the wp-config-sample.php to add additional options so that plugins
 # and themes can be installed into file system directly.
 
-sed -i "/'DB_COLLATE', '');/a" "define('FS_METHOD', 'direct');" wp-config-sample.php
+sed -i "/'DB_COLLATE', '');/a\
+define('FS_METHOD', 'direct');" wp-config-sample.php
