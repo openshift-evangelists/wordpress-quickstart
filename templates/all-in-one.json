@@ -4,16 +4,22 @@
     "metadata": {
         "name": "wordpress-all-in-one",
 	"annotations": {
-	    "description": "Wordpress (All In One)",
+	    "description": "WordPress (All In One)",
 	    "tags": "instant-app,wordpress"
 	}
     },
     "parameters": [
         {
             "name": "APPLICATION_NAME",
-            "description": "The name of the Wordpress instance.",
+            "description": "The name of the WordPress instance.",
             "value": "wordpress",
             "from": "[a-zA-Z0-9]",
+            "required": true
+        },
+        {
+            "name": "DATA_VOLUME_SIZE",
+            "description": "Size of the persistent volume for all data.",
+            "value": "1Gi",
             "required": true
         },
 	{
@@ -27,7 +33,31 @@
 	    "name": "DATABASE_PASSWORD",
 	    "from": "[a-f0-9]{12}",
 	    "generate": "expression"
-	}
+	},
+        {
+            "name": "WORDPRESS_REPOSITORY",
+            "description": "The source repository containing WordPress.",
+            "value": "https://github.com/WordPress/WordPress",
+            "required": true
+        },
+        {
+            "name": "WORDPRESS_VERSION",
+            "description": "The tagged version of WordPress to use.",
+            "value": "4.8-branch",
+            "required": true
+        },
+        {
+            "name": "PHP_VERSION",
+            "description": "The version of PHP to run WordPress.",
+            "value": "7.0",
+            "required": true
+        },
+        {
+            "name": "MYSQL_VERSION",
+            "description": "The version of the MySQL database.",
+            "value": "5.7",
+            "required": true
+        }
     ],
     "objects": [
         {
@@ -61,7 +91,8 @@
                 "source": {
                     "type": "Git",
                     "git": {
-                        "uri": "https://github.com/WordPress/WordPress"
+                        "uri": "${WORDPRESS_REPOSITORY}",
+                        "ref": "${WORDPRESS_VERSION}"
                     }
                 },
                 "strategy": {
@@ -70,7 +101,7 @@
                         "from": {
                             "kind": "ImageStreamTag",
                             "namespace": "openshift",
-                            "name": "php:7.0"
+                            "name": "php:${PHP_VERSION}"
                         },
                         "scripts": "https://raw.githubusercontent.com/GrahamDumpleton/wordpress-quickstart/master/bootstrap"
                     }
@@ -123,7 +154,7 @@
                             "from": {
                                 "kind": "ImageStreamTag",
                                 "namespace": "openshift",
-                                "name": "mysql:5.7"
+                                "name": "mysql:${MYSQL_VERSION}"
                             }
                         }
                     }
@@ -289,7 +320,7 @@
                 ],
                 "resources": {
                     "requests": {
-                        "storage": "1Gi"
+                        "storage": "${DATA_VOLUME_SIZE}"
                     }
                 }
             }
