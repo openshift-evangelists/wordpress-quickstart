@@ -4,4 +4,14 @@ set -x
 
 set -eo pipefail
 
+# Check the wp-content directory and if the plugins and themes directories
+# do not exist, restore the contents of the directory from the tarball we
+# created in the assemble script.
+
+if [ ! -d wp-content/plugins -a ! -d wp-content/themes ]; then
+    tar xvf wp-content.tar
+fi
+
+# Execute the original run script, replacing this script as process ID 1.
+
 exec /usr/libexec/s2i/run

@@ -4,4 +4,13 @@ set -x
 
 set -eo pipefail
 
+# Run the original assemble script. This will ensure that everything is
+# copied into place and setup.
+
 /usr/libexec/s2i/assemble
+
+# Tar up a copy of the original wp-content directory so we can restore
+# it when the Wordpress image is started up the first time and the
+# wp-content directory has been replaced with a persistent volume.
+
+tar cvf wp-content.tar wp-content
