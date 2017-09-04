@@ -24,7 +24,7 @@
             "metadata": {
                 "name": "${APPLICATION_NAME}-img",
                 "labels": {
-                    "app": "${APPLICATION_NAME}-img"
+                    "app": "${APPLICATION_NAME}"
                 }
             }
         },
