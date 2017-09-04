@@ -31,7 +31,7 @@
 	{
 	    "description": "The password for the database user.",
 	    "name": "DATABASE_PASSWORD",
-	    "from": "[a-f0-9]{12}",
+	    "from": "[a-zA-Z0-9]{12}",
 	    "generate": "expression"
 	},
         {
