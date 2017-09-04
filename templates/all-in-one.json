@@ -329,7 +329,7 @@
                 },
                 "tls": {
                     "termination": "edge",
-                    "insecureEdgeTerminationPolicy": "Redirect"
+                    "insecureEdgeTerminationPolicy": "Allow"
                 }
             }
         },
