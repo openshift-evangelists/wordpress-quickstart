@@ -20,7 +20,7 @@ secret() {
     python -c 'import random; import string; print("".join([random.SystemRandom().choice(string.ascii_letters+string.digits) for i in range(50)]))'
 }
 
-if [ ! -f wp-config.php ]; then
+if [ ! -f wp-config.php -a ! -f wp-content/wp-config.php ]; then
     cp wp-config-sample.php wp-content/wp-config-temp.php
 
     sed -i "s/'DB_NAME', *'database_name_here'/'DB_NAME', '$MYSQL_DATABASE'/" wp-content/wp-config-temp.php
