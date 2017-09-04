@@ -15,7 +15,19 @@
             "value": "wordpress",
             "from": "[a-zA-Z0-9]",
             "required": true
-        }
+        },
+	{
+	    "description": "The name of the database user.",
+	    "name": "DATABASE_USERNAME",
+	    "from": "[a-f0-9]{8}",
+	    "generate": "expression"
+	},
+	{
+	    "description": "The password for the database user.",
+	    "name": "DATABASE_PASSWORD",
+	    "from": "[a-f0-9]{8}",
+	    "generate": "expression"
+	}
     ],
     "objects": [
         {
@@ -147,6 +159,28 @@
                                         "protocol": "TCP"
                                     }
                                 ],
+                                "env": [
+                                    {
+                                        "name": "MYSQL_DATABASE",
+                                        "value": "wordpress"
+                                    },
+                                    {
+                                        "name": "MYSQL_USER",
+                                        "value": "${DATABASE_USERNAME}"
+                                    },
+                                    {
+                                        "name": "MYSQL_PASSWORD",
+                                        "value": "${DATABASE_PASSWORD}"
+                                    },
+                                    {
+                                        "name": "MYSQL_HOST",
+                                        "value": "127.0.0.1"
+                                    },
+                                    {
+                                        "name": "MYSQL_TABLE_PREFIX",
+                                        "value": "wp_"
+                                    }
+                                ],
                                 "volumeMounts": [
                                     {
                                         "name": "data",
@@ -167,15 +201,15 @@
                                 "env": [
                                     {
                                         "name": "MYSQL_DATABASE",
-                                        "value": "db"
-                                    },
-                                    {
-                                        "name": "MYSQL_PASSWORD",
-                                        "value": "password"
+                                        "value": "wordpress"
                                     },
                                     {
                                         "name": "MYSQL_USER",
-                                        "value": "user"
+                                        "value": "${DATABASE_USERNAME}"
+                                    },
+                                    {
+                                        "name": "MYSQL_PASSWORD",
+                                        "value": "${DATABASE_PASSWORD}"
                                     }
                                 ],
                                 "resources": {},

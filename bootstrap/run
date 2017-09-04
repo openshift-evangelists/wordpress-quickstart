@@ -12,6 +12,27 @@ if [ ! -d wp-content/plugins -a ! -d wp-content/themes ]; then
     tar xvf wp-content.tar
 fi
 
+# Check whether the wp-config.php file has been generated previously. If
+# not then we need to generate it. This is placed in the wp-content directory
+# on basis that it is in persistent storage.
+
+if [ ! -f wp-config.php ]; then
+    cp wp-config-sample.php wp-content/wp-config-temp.php
+
+    sed -i "s/'DB_NAME', 'database_name_here'/'DB_NAME', '$MYSQL_DATABASE'/"
+    sed -i "s/'DB_USER', 'username_here'/'DB_USER', '$MYSQL_USER'/"
+    sed -i "s/'DB_PASSWORD', 'password_here'/'DB_PASSWORD', '$MYSQL_PASSWORD'/"
+    sed -i "s/'DB_HOST', 'localhost'/'DB_HOST', '$MYSQL_HOST'/"
+    sed -i "s/\$table_prefix  = 'wp_';/\$table_prefix  = '$MYSQL_TABLE_PREFIX';/"
+
+    mv wp-content/wp-config-temp.php wp-content/wp-config.php
+fi
+
+# Copy the previously generated wp-config.php from the wp-content diretcory
+# into location Wordpress is expecting it.
+
+cp wp-content/wp-config.php wp-config.php
+
 # Execute the original run script, replacing this script as process ID 1.
 
 exec /usr/libexec/s2i/run
