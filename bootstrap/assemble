@@ -16,7 +16,11 @@ set -eo pipefail
 tar cvf wp-content.tar wp-content
 
 # Edit the wp-config-sample.php to add additional options so that plugins
-# and themes can be installed into file system directly.
+# and themes can be installed into file system directly. Also ensure that
+# use a secure connection for login and adminstration.
 
 sed -i "/'DB_COLLATE', '');/a\
 define('FS_METHOD', 'direct');" wp-config-sample.php
+
+sed -i "/'DB_COLLATE', '');/a\
+define( 'FORCE_SSL_ADMIN', true );" wp-config-sample.php
