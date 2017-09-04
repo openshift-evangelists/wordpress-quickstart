@@ -42,10 +42,10 @@ if [ ! -f wp-content/wp-config.php ]; then
 fi
 
 # Copy the previously generated wp-config.php from the wp-content diretcory
-# into location Wordpress is expecting it.
+# into location WordPress is expecting it.
 
 cp wp-content/wp-config.php wp-config.php
 
-# Execute the original run script, replacing this script as process ID 1.
+# Execute the original run script, replacing this script as current process.
 
 exec /usr/libexec/s2i/run
