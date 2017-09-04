@@ -59,7 +59,8 @@
                             "kind": "ImageStreamTag",
                             "namespace": "openshift",
                             "name": "php:7.0"
-                        }
+                        },
+                        "scripts": "https://raw.githubusercontent.com/GrahamDumpleton/wordpress-quickstart/master/bootstrap"
                     }
                 },
                 "output": {
