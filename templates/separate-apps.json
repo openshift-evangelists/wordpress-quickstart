@@ -1,0 +1,438 @@
+{
+    "kind": "Template",
+    "apiVersion": "v1",
+    "metadata": {
+        "name": "wordpress-separate-apps",
+	"annotations": {
+	    "description": "WordPress (Separate Apps)",
+	    "tags": "instant-app,wordpress"
+	}
+    },
+    "parameters": [
+        {
+            "name": "APPLICATION_NAME",
+            "description": "The name of the WordPress instance.",
+            "value": "wordpress",
+            "from": "[a-zA-Z0-9]",
+            "required": true
+        },
+        {
+            "name": "DATABASE_VOLUME_SIZE",
+            "description": "Size of the persistent volume for the database.",
+            "value": "1Gi",
+            "required": true
+        },
+        {
+            "name": "WORDPRESS_VOLUME_SIZE",
+            "description": "Size of the persistent volume for Wordpress.",
+            "value": "1Gi",
+            "required": true
+        },
+        {
+            "name": "WORDPRESS_MEMORY_LIMIT",
+            "description": "Amount of memory available to WordPress.",
+            "value": "512Mi",
+            "required": true
+        },
+        {
+            "name": "DATABASE_MEMORY_LIMIT",
+            "description": "Amount of memory available to the database.",
+            "value": "512Mi",
+            "required": true
+        },
+	{
+	    "description": "The name of the database user.",
+	    "name": "DATABASE_USERNAME",
+	    "from": "user[a-f0-9]{8}",
+	    "generate": "expression"
+	},
+	{
+	    "description": "The password for the database user.",
+	    "name": "DATABASE_PASSWORD",
+	    "from": "[a-zA-Z0-9]{12}",
+	    "generate": "expression"
+	},
+        {
+            "name": "WORDPRESS_REPOSITORY",
+            "description": "The source repository containing WordPress.",
+            "value": "https://github.com/WordPress/WordPress",
+            "required": true
+        },
+        {
+            "name": "WORDPRESS_VERSION",
+            "description": "The tagged version of WordPress to use.",
+            "value": "4.8-branch",
+            "required": true
+        },
+        {
+            "name": "PHP_VERSION",
+            "description": "The version of PHP to run WordPress.",
+            "value": "7.0",
+            "required": true
+        },
+        {
+            "name": "MYSQL_VERSION",
+            "description": "The version of the MySQL database.",
+            "value": "5.7",
+            "required": true
+        }
+    ],
+    "objects": [
+        {
+            "kind": "ImageStream",
+            "apiVersion": "v1",
+            "metadata": {
+                "name": "${APPLICATION_NAME}-img",
+                "labels": {
+                    "app": "${APPLICATION_NAME}"
+                }
+            }
+        },
+        {
+            "kind": "BuildConfig",
+            "apiVersion": "v1",
+            "metadata": {
+                "name": "${APPLICATION_NAME}",
+                "labels": {
+                    "app": "${APPLICATION_NAME}"
+                }
+            },
+            "spec": {
+                "triggers": [
+                    {
+                        "type": "ConfigChange"
+                    },
+                    {
+                        "type": "ImageChange"
+                    }
+                ],
+                "source": {
+                    "type": "Git",
+                    "git": {
+                        "uri": "${WORDPRESS_REPOSITORY}",
+                        "ref": "${WORDPRESS_VERSION}"
+                    }
+                },
+                "strategy": {
+                    "type": "Source",
+                    "sourceStrategy": {
+                        "from": {
+                            "kind": "ImageStreamTag",
+                            "namespace": "openshift",
+                            "name": "php:${PHP_VERSION}"
+                        },
+                        "scripts": "https://raw.githubusercontent.com/GrahamDumpleton/wordpress-quickstart/master/bootstrap"
+                    }
+                },
+                "output": {
+                    "to": {
+                        "kind": "ImageStreamTag",
+                        "name": "${APPLICATION_NAME}-img:latest"
+                    }
+                }
+            }
+        },
+        {
+            "kind": "DeploymentConfig",
+            "apiVersion": "v1",
+            "metadata": {
+                "name": "${APPLICATION_NAME}",
+                "labels": {
+                    "app": "${APPLICATION_NAME}"
+                }
+            },
+            "spec": {
+                "strategy": {
+                    "type": "Recreate"
+                },
+                "triggers": [
+                    {
+                        "type": "ConfigChange"
+                    },
+                    {
+                        "type": "ImageChange",
+                        "imageChangeParams": {
+                            "automatic": true,
+                            "containerNames": [
+                                "wordpress"
+                            ],
+                            "from": {
+                                "kind": "ImageStreamTag",
+                                "name": "${APPLICATION_NAME}-img:latest"
+                            }
+                        }
+                    }
+                ],
+                "replicas": 1,
+                "selector": {
+                    "app": "${APPLICATION_NAME}",
+                    "deploymentconfig": "${APPLICATION_NAME}"
+                },
+                "template": {
+                    "metadata": {
+                        "labels": {
+                            "app": "${APPLICATION_NAME}",
+                            "deploymentconfig": "${APPLICATION_NAME}"
+                        }
+                    },
+                    "spec": {
+                        "volumes": [
+                            {
+                                "name": "data",
+                                "persistentVolumeClaim": {
+                                    "claimName": "${APPLICATION_NAME}-wordpress-data"
+                                }
+                            }
+                        ],
+                        "containers": [
+                            {
+                                "name": "wordpress",
+                                "image": "${APPLICATION_NAME}-img",
+                                "ports": [
+                                    {
+                                        "containerPort": 8080,
+                                        "protocol": "TCP"
+                                    }
+                                ],
+				"resources": {
+                                    "limits": {
+                                        "memory": "${WORDPRESS_MEMORY_LIMIT}"
+				    }
+                                },
+                                "env": [
+                                    {
+                                        "name": "MYSQL_DATABASE",
+                                        "value": "wordpress"
+                                    },
+                                    {
+                                        "name": "MYSQL_USER",
+                                        "value": "${DATABASE_USERNAME}"
+                                    },
+                                    {
+                                        "name": "MYSQL_PASSWORD",
+                                        "value": "${DATABASE_PASSWORD}"
+                                    },
+                                    {
+                                        "name": "MYSQL_HOST",
+                                        "value": "${APPLICATION_NAME}-db"
+                                    },
+                                    {
+                                        "name": "MYSQL_TABLE_PREFIX",
+                                        "value": "wp_"
+                                    }
+                                ],
+                                "volumeMounts": [
+                                    {
+                                        "name": "data",
+                                        "mountPath": "/opt/app-root/src/wp-content"
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                }
+            }
+        },
+        {
+            "kind": "DeploymentConfig",
+            "apiVersion": "v1",
+            "metadata": {
+                "name": "${APPLICATION_NAME}-db",
+                "labels": {
+                    "app": "${APPLICATION_NAME}"
+                }
+            },
+            "spec": {
+                "strategy": {
+                    "type": "Recreate"
+                },
+                "triggers": [
+                    {
+                        "type": "ConfigChange"
+                    },
+                    {
+                        "type": "ImageChange",
+                        "imageChangeParams": {
+                            "automatic": true,
+                            "containerNames": [
+                                "mysql"
+                            ],
+                            "from": {
+                                "kind": "ImageStreamTag",
+                                "namespace": "openshift",
+                                "name": "mysql:${MYSQL_VERSION}"
+                            }
+                        }
+                    }
+                ],
+                "replicas": 1,
+                "selector": {
+                    "app": "${APPLICATION_NAME}",
+                    "deploymentconfig": "${APPLICATION_NAME}-db"
+                },
+                "template": {
+                    "metadata": {
+                        "labels": {
+                            "app": "${APPLICATION_NAME}",
+                            "deploymentconfig": "${APPLICATION_NAME}-db"
+                        }
+                    },
+                    "spec": {
+                        "volumes": [
+                            {
+                                "name": "data",
+                                "persistentVolumeClaim": {
+                                    "claimName": "${APPLICATION_NAME}-mysql-data"
+                                }
+                            }
+                        ],
+                        "containers": [
+                            {
+                                "name": "mysql",
+                                "image": "centos/mysql-57-centos7",
+                                "ports": [
+                                    {
+                                        "containerPort": 3306,
+                                        "protocol": "TCP"
+                                    }
+                                ],
+				"resources": {
+                                    "limits": {
+                                        "memory": "${DATABASE_MEMORY_LIMIT}"
+				    }
+                                },
+                                "env": [
+                                    {
+                                        "name": "MYSQL_DATABASE",
+                                        "value": "wordpress"
+                                    },
+                                    {
+                                        "name": "MYSQL_USER",
+                                        "value": "${DATABASE_USERNAME}"
+                                    },
+                                    {
+                                        "name": "MYSQL_PASSWORD",
+                                        "value": "${DATABASE_PASSWORD}"
+                                    }
+                                ],
+                                "volumeMounts": [
+                                    {
+                                        "name": "data",
+                                        "mountPath": "/var/lib/mysql/data"
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                }
+            }
+        },
+        {
+            "kind": "Service",
+            "apiVersion": "v1",
+            "metadata": {
+                "name": "${APPLICATION_NAME}",
+                "labels": {
+                    "app": "${APPLICATION_NAME}"
+                }
+            },
+            "spec": {
+                "ports": [
+                    {
+                        "name": "8080-tcp",
+                        "protocol": "TCP",
+                        "port": 8080,
+                        "targetPort": 8080
+                    }
+                ],
+                "selector": {
+                    "app": "${APPLICATION_NAME}",
+                    "deploymentconfig": "${APPLICATION_NAME}"
+                }
+            }
+        },
+        {
+            "kind": "Service",
+            "apiVersion": "v1",
+            "metadata": {
+                "name": "${APPLICATION_NAME}-db",
+                "labels": {
+                    "app": "${APPLICATION_NAME}"
+                }
+            },
+            "spec": {
+                "ports": [
+                    {
+                        "name": "3306-tcp",
+                        "protocol": "TCP",
+                        "port": 3306,
+                        "targetPort": 3306
+                    }
+                ],
+                "selector": {
+                    "app": "${APPLICATION_NAME}",
+                    "deploymentconfig": "${APPLICATION_NAME}-db"
+                }
+            }
+        },
+        {
+            "kind": "Route",
+            "apiVersion": "v1",
+            "metadata": {
+                "name": "${APPLICATION_NAME}",
+                "labels": {
+                    "app": "${APPLICATION_NAME}"
+                }
+            },
+            "spec": {
+                "host": "",
+                "to": {
+                    "kind": "Service",
+                    "name": "${APPLICATION_NAME}",
+                    "weight": 100
+                },
+                "port": {
+                    "targetPort": 8080
+                },
+                "tls": {
+                    "termination": "edge",
+                    "insecureEdgeTerminationPolicy": "Allow"
+                }
+            }
+        },
+        {
+            "kind": "PersistentVolumeClaim",
+            "apiVersion": "v1",
+            "metadata": {
+                "name": "${APPLICATION_NAME}-mysql-data"
+            },
+            "spec": {
+                "accessModes": [
+                    "ReadWriteOnce"
+                ],
+                "resources": {
+                    "requests": {
+                        "storage": "${DATABASE_VOLUME_SIZE}"
+                    }
+                }
+            }
+        },
+        {
+            "kind": "PersistentVolumeClaim",
+            "apiVersion": "v1",
+            "metadata": {
+                "name": "${APPLICATION_NAME}-wordpress-data"
+            },
+            "spec": {
+                "accessModes": [
+                    "ReadWriteOnce"
+                ],
+                "resources": {
+                    "requests": {
+                        "storage": "${WORDPRESS_VOLUME_SIZE}"
+                    }
+                }
+            }
+        }
+    ]
+}
