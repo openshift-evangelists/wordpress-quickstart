@@ -332,6 +332,11 @@
                                         "protocol": "TCP"
                                     }
                                 ],
+				"resources": {
+                                    "limits": {
+                                        "memory": "${DATABASE_MEMORY_LIMIT}"
+				    }
+                                },
 				"readinessProbe": {
 				  "timeoutSeconds": 1,
 				  "initialDelaySeconds": 5,
@@ -347,11 +352,6 @@
 				    "port": 3306
 				  }
 				},
-				"resources": {
-                                    "limits": {
-                                        "memory": "${DATABASE_MEMORY_LIMIT}"
-				    }
-                                },
                                 "env": [
                                     {
                                         "name": "MYSQL_DATABASE",

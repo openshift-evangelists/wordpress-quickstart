@@ -209,6 +209,28 @@
                                         "memory": "${WORDPRESS_MEMORY_LIMIT}"
 				    }
                                 },
+				"readinessProbe": {
+				    "failureThreshold": 3,
+				    "httpGet": {
+					"path": "/",
+					"port": 8080,
+					"scheme": "HTTP"
+				    },
+				    "periodSeconds": 10,
+				    "successThreshold": 1,
+				    "timeoutSeconds": 1
+				},
+				"livenessProbe": {
+				    "failureThreshold": 3,
+				    "httpGet": {
+					"path": "/",
+					"port": 8080,
+					"scheme": "HTTP"
+				    },
+				    "periodSeconds": 10,
+				    "successThreshold": 1,
+				    "timeoutSeconds": 1
+				},
                                 "env": [
                                     {
                                         "name": "MYSQL_DATABASE",
@@ -253,6 +275,21 @@
                                         "memory": "${DATABASE_MEMORY_LIMIT}"
 				    }
                                 },
+				"readinessProbe": {
+				  "timeoutSeconds": 1,
+				  "initialDelaySeconds": 5,
+				  "exec": {
+				    "command": [ "/bin/sh", "-i", "-c",
+				      "MYSQL_PWD=\"$MYSQL_PASSWORD\" mysql -h 127.0.0.1 -u $MYSQL_USER -D $MYSQL_DATABASE -e 'SELECT 1'"]
+				  }
+				},
+				"livenessProbe": {
+				  "timeoutSeconds": 1,
+				  "initialDelaySeconds": 30,
+				  "tcpSocket": {
+				    "port": 3306
+				  }
+				},
                                 "env": [
                                     {
                                         "name": "MYSQL_DATABASE",
