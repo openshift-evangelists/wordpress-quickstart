@@ -4,12 +4,16 @@ set -x
 
 set -eo pipefail
 
+# Ensure the wp-content directory exists in the persistent volume.
+
+mkdir /opt/app-root/data/wp-content
+
 # Check the wp-content directory and if the plugins and themes directories
 # do not exist, restore the contents of the directory from the tarball we
 # created in the assemble script.
 
 if [ ! -d wp-content/plugins -a ! -d wp-content/themes ]; then
-    tar -C wp-content -xvf /opt/app-root/wp-content.tar
+    tar xvf /opt/app-root/wp-content.tar
 fi
 
 # Check whether the wp-config.php file has been generated previously. If
