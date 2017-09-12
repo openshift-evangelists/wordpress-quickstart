@@ -55,7 +55,7 @@ ln -s wp-content/wp-config.php wp-config.php
 # then we need to generate it. This is placed in the wp-content directory
 # on basis that it is in persistent storage.
 
-if [ ! -f wp-content/wp-htaccess]; then
+if [ ! -f wp-content/wp-htaccess ]; then
     case "$WORDPRESS_MULTISITE_TYPE" in
         [Ss]ub-domains)
             cat > wp-content/wp-htaccess << !
