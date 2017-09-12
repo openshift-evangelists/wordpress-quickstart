@@ -56,7 +56,30 @@ ln -s wp-content/wp-config.php wp-config.php
 # on basis that it is in persistent storage.
 
 if [ ! -f wp-content/wp-htaccess]; then
-    cat > wp-content/wp-htaccess << !
+    case "$WORDPRESS_MULTISITE_TYPE" in
+        [Ss]ub-domains)
+            cat > wp-content/wp-htaccess << !
+# BEGIN WordPress
+RewriteEngine On
+RewriteBase /
+RewriteRule ^index\.php$ - [L]
+
+# add a trailing slash to /wp-admin
+RewriteRule ^wp-admin$ wp-admin/ [R=301,L]
+
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+RewriteRule ^(wp-(content|admin|includes).*) $1 [L]
+RewriteRule ^(.*\.php)$ $1 [L]
+RewriteRule . index.php [L]
+# END WordPress
+!
+            ;;
+        [Ss]ub-directories)
+            ;;
+        *)
+            cat > wp-content/wp-htaccess << !
 # BEGIN WordPress
 <IfModule mod_rewrite.c>
 RewriteEngine On
@@ -68,6 +91,8 @@ RewriteRule . /index.php [L]
 </IfModule>
 # END WordPress
 !
+            ;;
+    esac
 fi
 
 # Link the previously generated .htaccess from the wp-content diretcory

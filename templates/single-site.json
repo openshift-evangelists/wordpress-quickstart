@@ -71,6 +71,12 @@
             "required": true
         },
         {
+            "name": "WORDPRESS_MULTISITE_TYPE",
+            "description": "Type of Multisite network if Multisite enabled.",
+            "value": "Sub-domains",
+            "required": true
+        },
+        {
             "name": "WORDPRESS_REPOSITORY",
             "description": "The source repository containing WordPress.",
             "value": "https://github.com/WordPress/WordPress",
@@ -241,6 +247,10 @@
                                     {
                                         "name": "WORDPRESS_ALLOW_MULTISITE",
                                         "value": "${WORDPRESS_ALLOW_MULTISITE}"
+                                    },
+                                    {
+                                        "name": "WORDPRESS_MULTISITE_TYPE",
+                                        "value": "${WORDPRESS_MULTISITE_TYPE}"
                                     }
                                 ],
                                 "volumeMounts": [
