@@ -38,13 +38,18 @@ if [ ! -f wp-content/wp-config.php ]; then
     sed -i "s/'LOGGED_IN_SALT', *'put your unique phrase here'/'LOGGED_IN_SALT', '`secret`'/" wp-content/wp-config-temp.php
     sed -i "s/'NONCE_SALT', *'put your unique phrase here'/'NONCE_SALT', '`secret`'/" wp-content/wp-config-temp.php
 
+    if [ x"$WORDPRESS_ALLOW_MULTISITE" = x"true" ]; then
+        sed -i "/'DB_COLLATE', *'');/a\
+define('WP_ALLOW_MULTISITE', 'true');" wp-content/wp-config-temp.php
+    fi
+
     mv wp-content/wp-config-temp.php wp-content/wp-config.php
 fi
 
-# Copy the previously generated wp-config.php from the wp-content diretcory
+# Link the previously generated wp-config.php from the wp-content diretcory
 # into location WordPress is expecting it.
 
-cp wp-content/wp-config.php wp-config.php
+ln -s wp-content/wp-config.php wp-config.php
 
 # Execute the original run script, replacing this script as current process.
 

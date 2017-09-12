@@ -65,6 +65,12 @@
 	    "generate": "expression"
 	},
         {
+            "name": "WORDPRESS_ALLOW_MULTISITE",
+            "description": "Whether WordPress should be setup for MultiSite.",
+            "value": "false",
+            "required": true
+        },
+        {
             "name": "WORDPRESS_REPOSITORY",
             "description": "The source repository containing WordPress.",
             "value": "https://github.com/WordPress/WordPress",
@@ -231,6 +237,10 @@
                                     {
                                         "name": "MYSQL_TABLE_PREFIX",
                                         "value": "wp_"
+                                    },
+                                    {
+                                        "name": "WORDPRESS_ALLOW_MULTISITE",
+                                        "value": "${WORDPRESS_ALLOW_MULTISITE}"
                                     }
                                 ],
                                 "volumeMounts": [
