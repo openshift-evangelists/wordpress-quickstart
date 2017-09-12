@@ -216,7 +216,7 @@
 				"readinessProbe": {
 				    "failureThreshold": 3,
 				    "httpGet": {
-					"path": "/",
+					"path": "/wp-includes/images/blank.gif",
 					"port": 8080,
 					"scheme": "HTTP"
 				    },
@@ -227,7 +227,7 @@
 				"livenessProbe": {
 				    "failureThreshold": 3,
 				    "httpGet": {
-					"path": "/",
+					"path": "/wp-includes/images/blank.gif",
 					"port": 8080,
 					"scheme": "HTTP"
 				    },
