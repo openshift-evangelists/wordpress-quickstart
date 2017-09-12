@@ -66,20 +66,8 @@
 	},
         {
             "name": "WORDPRESS_ALLOW_MULTISITE",
-            "description": "Whether WordPress should be setup for MultiSite.",
+            "description": "Allow WordPress to be configured as Multisite.",
             "value": "false",
-            "required": true
-        },
-        {
-            "name": "WORDPRESS_MULTISITE_HOST",
-            "description": "",
-            "value": "",
-            "required": true
-        },
-        {
-            "name": "WORDPRESS_MULTISITE_TYPE",
-            "description": "Type of Multisite network if Multisite enabled.",
-            "value": "Sub-domains",
             "required": true
         },
         {
@@ -253,14 +241,6 @@
                                     {
                                         "name": "WORDPRESS_ALLOW_MULTISITE",
                                         "value": "${WORDPRESS_ALLOW_MULTISITE}"
-                                    },
-                                    {
-                                        "name": "WORDPRESS_MULTISITE_HOST",
-                                        "value": "${WORDPRESS_MULTISITE_HOST}"
-                                    },
-                                    {
-                                        "name": "WORDPRESS_MULTISITE_TYPE",
-                                        "value": "${WORDPRESS_MULTISITE_TYPE}"
                                     }
                                 ],
                                 "volumeMounts": [

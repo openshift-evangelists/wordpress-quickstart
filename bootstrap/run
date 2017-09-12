@@ -46,28 +46,6 @@ if [ ! -f /opt/app-root/data/wp-config.php ]; then
         sed -i "/'DB_COLLATE', *'');/a\
 define('WP_ALLOW_MULTISITE', 'true');" $TMPCONFIG
 
-	case "$WORDPRESS_MULTISITE_TYPE" in
-	    [Ss]ub-domains)
-        sed -i "/'DB_COLLATE', *'');/a\
-define('SUBDOMAIN_INSTALL', true);\
-define('DOMAIN_CURRENT_SITE', '$WORDPRESS_MULTISITE_HOST');\
-define('PATH_CURRENT_SITE', '/');\
-define('SITE_ID_CURRENT_SITE', 1);\
-define('BLOG_ID_CURRENT_SITE', 1);" $TMPCONFIG
-		;;
-	    [Ss]ub-directories)
-        sed -i "/'DB_COLLATE', *'');/a\
-define('SUBDOMAIN_INSTALL', false);\
-define('DOMAIN_CURRENT_SITE', '$WORDPRESS_MULTISITE_HOST');\
-define('PATH_CURRENT_SITE', '/');\
-define('SITE_ID_CURRENT_SITE', 1);\
-define('BLOG_ID_CURRENT_SITE', 1);" $TMPCONFIG
-		;;
-	    *)
-		;;
-        esac
-    fi
-
     mv $TMPCONFIG /opt/app-root/data/wp-config.php
 fi
 
@@ -80,47 +58,7 @@ ln -s /opt/app-root/data/wp-config.php wp-config.php
 # then we need to generate it. This is placed in the persistent volume.
 
 if [ ! -f /opt/app-root/data/.htaccess ]; then
-    case "$WORDPRESS_MULTISITE_TYPE" in
-        [Ss]ub-domains)
-            cat > /opt/app-root/data/.htaccess << !
-# BEGIN WordPress
-RewriteEngine On
-RewriteBase /
-RewriteRule ^index\\.php\$ - [L]
-
-# add a trailing slash to /wp-admin
-RewriteRule ^wp-admin\$ wp-admin/ [R=301,L]
-
-RewriteCond %{REQUEST_FILENAME} -f [OR]
-RewriteCond %{REQUEST_FILENAME} -d
-RewriteRule ^ - [L]
-RewriteRule ^(wp-(content|admin|includes).*) \$1 [L]
-RewriteRule ^(.*\\.php)\$ \$1 [L]
-RewriteRule . index.php [L]
-# END WordPress
-!
-            ;;
-        [Ss]ub-directories)
-            cat > /opt/app-root/data/.htaccess << !
-# BEGIN WordPress
-RewriteEngine On
-RewriteBase /
-RewriteRule ^index\\.php\$ - [L]
-
-# add a trailing slash to /wp-admin
-RewriteRule ^([_0-9a-zA-Z-]+/)?wp-admin\$ \$1wp-admin/ [R=301,L]
-
-RewriteCond %{REQUEST_FILENAME} -f [OR]
-RewriteCond %{REQUEST_FILENAME} -d
-RewriteRule ^ - [L]
-RewriteRule ^([_0-9a-zA-Z-]+/)?(wp-(content|admin|includes).*) \$2 [L]
-RewriteRule ^([_0-9a-zA-Z-]+/)?(.*\\.php)\$ \$2 [L]
-RewriteRule . index.php [L]
-# END WordPress
-!
-            ;;
-        *)
-            cat > /opt/app-root/data/.htaccess << !
+    cat > /opt/app-root/data/.htaccess << !
 # BEGIN WordPress
 <IfModule mod_rewrite.c>
 RewriteEngine On
@@ -132,8 +70,6 @@ RewriteRule . /index.php [L]
 </IfModule>
 # END WordPress
 !
-            ;;
-    esac
 fi
 
 # Link the previously generated .htaccess from the persistent volume
