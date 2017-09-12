@@ -71,6 +71,12 @@
             "required": true
         },
         {
+            "name": "WORDPRESS_MULTISITE_HOST",
+            "description": "",
+            "value": "",
+            "required": true
+        },
+        {
             "name": "WORDPRESS_MULTISITE_TYPE",
             "description": "Type of Multisite network if Multisite enabled.",
             "value": "Sub-domains",

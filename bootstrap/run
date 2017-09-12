@@ -41,6 +41,27 @@ if [ ! -f wp-content/wp-config.php ]; then
     if [ x"$WORDPRESS_ALLOW_MULTISITE" = x"true" ]; then
         sed -i "/'DB_COLLATE', *'');/a\
 define('WP_ALLOW_MULTISITE', 'true');" wp-content/wp-config-temp.php
+
+	case "$WORDPRESS_MULTISITE_TYPE" in
+	    [Ss]ub-domains)
+        sed -i "/'DB_COLLATE', *'');/a\
+define('SUBDOMAIN_INSTALL', true);
+define('DOMAIN_CURRENT_SITE', '$WORDPRESS_MULTISITE_HOST');
+define('PATH_CURRENT_SITE', '/');
+define('SITE_ID_CURRENT_SITE', 1);
+define('BLOG_ID_CURRENT_SITE', 1);" wp-content/wp-config-temp.php
+		;;
+	    [Ss]ub-directories)
+        sed -i "/'DB_COLLATE', *'');/a\
+define('SUBDOMAIN_INSTALL', false);
+define('DOMAIN_CURRENT_SITE', '$WORDPRESS_MULTISITE_HOST');
+define('PATH_CURRENT_SITE', '/');
+define('SITE_ID_CURRENT_SITE', 1);
+define('BLOG_ID_CURRENT_SITE', 1);" wp-content/wp-config-temp.php
+		;;
+	    *)
+		;;
+        esac
     fi
 
     mv wp-content/wp-config-temp.php wp-content/wp-config.php
@@ -77,6 +98,23 @@ RewriteRule . index.php [L]
 !
             ;;
         [Ss]ub-directories)
+            cat > wp-content/wp-htaccess << !
+# BEGIN WordPress
+RewriteEngine On
+RewriteBase /
+RewriteRule ^index\.php$ - [L]
+
+# add a trailing slash to /wp-admin
+RewriteRule ^([_0-9a-zA-Z-]+/)?wp-admin$ $1wp-admin/ [R=301,L]
+
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+RewriteRule ^([_0-9a-zA-Z-]+/)?(wp-(content|admin|includes).*) $2 [L]
+RewriteRule ^([_0-9a-zA-Z-]+/)?(.*\.php)$ $2 [L]
+RewriteRule . index.php [L]
+# END WordPress
+!
             ;;
         *)
             cat > wp-content/wp-htaccess << !
