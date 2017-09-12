@@ -45,18 +45,18 @@ define('WP_ALLOW_MULTISITE', 'true');" wp-content/wp-config-temp.php
 	case "$WORDPRESS_MULTISITE_TYPE" in
 	    [Ss]ub-domains)
         sed -i "/'DB_COLLATE', *'');/a\
-define('SUBDOMAIN_INSTALL', true);
-define('DOMAIN_CURRENT_SITE', '$WORDPRESS_MULTISITE_HOST');
-define('PATH_CURRENT_SITE', '/');
-define('SITE_ID_CURRENT_SITE', 1);
+define('SUBDOMAIN_INSTALL', true);\
+define('DOMAIN_CURRENT_SITE', '$WORDPRESS_MULTISITE_HOST');\
+define('PATH_CURRENT_SITE', '/');\
+define('SITE_ID_CURRENT_SITE', 1);\
 define('BLOG_ID_CURRENT_SITE', 1);" wp-content/wp-config-temp.php
 		;;
 	    [Ss]ub-directories)
         sed -i "/'DB_COLLATE', *'');/a\
-define('SUBDOMAIN_INSTALL', false);
-define('DOMAIN_CURRENT_SITE', '$WORDPRESS_MULTISITE_HOST');
-define('PATH_CURRENT_SITE', '/');
-define('SITE_ID_CURRENT_SITE', 1);
+define('SUBDOMAIN_INSTALL', false);\
+define('DOMAIN_CURRENT_SITE', '$WORDPRESS_MULTISITE_HOST');\
+define('PATH_CURRENT_SITE', '/');\
+define('SITE_ID_CURRENT_SITE', 1);\
 define('BLOG_ID_CURRENT_SITE', 1);" wp-content/wp-config-temp.php
 		;;
 	    *)
