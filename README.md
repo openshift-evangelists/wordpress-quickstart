@@ -40,8 +40,7 @@ wordpress-standard-installation
 wordpress-testing-environment
 ```
 
-From the web console select _Add to Project_ and then _
-Import YAML / JSON_. Upload each template or cut and paste its contents into the form. When asked whether you wish to process the template or update the template, select _Update template_ so that it will be available under _Browse Catalog_ when selecting _Add to Project_.
+From the web console select _Add to Project_ and then _Import YAML / JSON_. Upload each template or cut and paste its contents into the form. When asked whether you wish to process the template or update the template, select _Update template_ so that it will be available under _Browse Catalog_ when selecting _Add to Project_.
 
 Deploying WordPress
 -------------------
@@ -88,3 +87,8 @@ Fill in your details and click on **Install WordPress**. You will receive confir
 ![Instance Created](./screenshots/wordpress-instance-created.png)
 
 You can now log in to your WordPress instance and start using it.
+
+Testing Environment
+-------------------
+
+If you want to play with WordPress to test out features, validate data migration steps etc, you can use the _WordPress (Testing Environment)_ template. In this configuration, only a single persistent volume is required as the WordPress instance and the MySQL database are run together in the same pod and will share the one persistent volume. In this configuration, you can never scale WordPress up to more than 1 replica, nor enable rolling deployment strategy, even if you have _ReadWriteMany_ persistent volume type available. This restriction exists as scaling up WordPress will also scale up the number of MySQL database instances which would result in database corruption. This configuration is only recommended for testing.
