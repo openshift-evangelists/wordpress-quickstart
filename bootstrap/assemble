@@ -18,7 +18,7 @@ chmod g+w /opt/app-root/data
 # it when the WordPress image is started up the first time and the
 # persistent volume mounted.
 
-tar cf /opt/app-root/wp-content.tar wp-content
+tar -C wp-content -cf /opt/app-root/wp-content.tar .
 
 # Also copy the original wp-content directory into the directory used as
 # the mount point for the persistent volume just in case image not run
