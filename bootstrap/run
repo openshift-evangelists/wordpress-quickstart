@@ -51,6 +51,30 @@ fi
 
 ln -s wp-content/wp-config.php wp-config.php
 
+# Check whether the .htaccess file has been generated previously. If not
+# then we need to generate it. This is placed in the wp-content directory
+# on basis that it is in persistent storage.
+
+if [ ! -f wp-content/wp-htaccess]; then
+    cat > wp-content/wp-htaccess << !
+# BEGIN WordPress
+<IfModule mod_rewrite.c>
+RewriteEngine On
+RewriteBase /
+RewriteRule ^index\.php$ - [L]
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule . /index.php [L]
+</IfModule>
+# END WordPress
+!
+fi
+
+# Link the previously generated .htaccess from the wp-content diretcory
+# into location WordPress is expecting it.
+
+ln -s wp-content/wp-htaccess .htaccess
+
 # Execute the original run script, replacing this script as current process.
 
 exec /usr/libexec/s2i/run
