@@ -12,6 +12,7 @@ set -eo pipefail
 # Create a directory to act as the mount point for the persistent volume.
 
 mkdir /opt/app-root/data
+chmod g+w /opt/app-root/data
 
 # Tar up a copy of the original wp-content directory so we can restore
 # it when the WordPress image is started up the first time and the
