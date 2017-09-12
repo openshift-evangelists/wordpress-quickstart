@@ -13,7 +13,7 @@ mkdir /opt/app-root/data/wp-content
 # created in the assemble script.
 
 if [ ! -d wp-content/plugins -a ! -d wp-content/themes ]; then
-    tar xvf /opt/app-root/wp-content.tar
+    tar -C wp-content -xvf /opt/app-root/wp-content.tar
 fi
 
 # Check whether the wp-config.php file has been generated previously. If
