@@ -19,7 +19,7 @@ Once you have forked the repository, edit the following template files:
 * [templates/standard-installation.json](templates/standard-installation.json)
 * [templates/testing-environment.json](templates/testing-environment.json)
 
-Search for the ``bc.spec.strategy.sourceStrategy.scripts`` field and change ``openshift-evangelists`` to the name of the GitHub account in which your created the fork of this repository. This will ensure that the S2I scripts are pulled from your copy of the repository.
+Search for the ``bc.spec.strategy.sourceStrategy.scripts`` field and change ``openshift-evangelists`` to the name of the GitHub account in which you created the fork of this repository. This will ensure that the S2I scripts are pulled from your copy of the repository.
 
 Loading the Templates
 ---------------------
@@ -65,7 +65,7 @@ Change the name of the WordPress instance if desired, as well as override the Wo
 
 You can optionally set the database username and password. If you do not, these will automatically be filled in with generated values. You can retrieve the values later from the environment settings of the deployment configuration if you need to access the MySQL database directly. You do not need to know the values of the database username and password when doing the deployment.
 
-Click on _Create_ to deploy the WordPress instance and return to the _Overview_ in the OpenShift web console.
+Click on **Create** to deploy the WordPress instance and return to the _Overview_ in the OpenShift web console.
 
 Configuring WordPress
 ---------------------
