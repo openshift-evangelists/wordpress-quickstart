@@ -9,38 +9,38 @@ set -eo pipefail
 # created in the assemble script.
 
 if [ ! -d wp-content/plugins -a ! -d wp-content/themes ]; then
-    tar xvf wp-content.tar
+    tar xvf /opt/app-root/wp-content.tar
 fi
 
 # Check whether the wp-config.php file has been generated previously. If
-# not then we need to generate it. This is placed in the wp-content directory
-# on basis that it is in persistent storage.
+# not then we need to generate it. This is placed in the persistent volume.
 
 secret() {
     python -c 'import random; import string; print("".join([random.SystemRandom().choice(string.ascii_letters+string.digits) for i in range(50)]))'
 }
 
-if [ ! -f wp-content/wp-config.php ]; then
-    cp wp-config-sample.php wp-content/wp-config-temp.php
+if [ ! -f /opt/app-root/data/wp-config.php ]; then
+    TMPCONFIG=/opt/app-root/data/wp-config-temp.php
+    cp wp-config-sample.php $TMPCONFIG
 
-    sed -i "s/'DB_NAME', *'database_name_here'/'DB_NAME', '$MYSQL_DATABASE'/" wp-content/wp-config-temp.php
-    sed -i "s/'DB_USER', *'username_here'/'DB_USER', '$MYSQL_USER'/" wp-content/wp-config-temp.php
-    sed -i "s/'DB_PASSWORD', *'password_here'/'DB_PASSWORD', '$MYSQL_PASSWORD'/" wp-content/wp-config-temp.php
-    sed -i "s/'DB_HOST', *'localhost'/'DB_HOST', '$MYSQL_HOST'/" wp-content/wp-config-temp.php
-    sed -i "s/\$table_prefix *= *'wp_';/\$table_prefix = '$MYSQL_TABLE_PREFIX';/" wp-content/wp-config-temp.php
+    sed -i "s/'DB_NAME', *'database_name_here'/'DB_NAME', '$MYSQL_DATABASE'/" $TMPCONFIG
+    sed -i "s/'DB_USER', *'username_here'/'DB_USER', '$MYSQL_USER'/" $TMPCONFIG
+    sed -i "s/'DB_PASSWORD', *'password_here'/'DB_PASSWORD', '$MYSQL_PASSWORD'/" $TMPCONFIG
+    sed -i "s/'DB_HOST', *'localhost'/'DB_HOST', '$MYSQL_HOST'/" $TMPCONFIG
+    sed -i "s/\$table_prefix *= *'wp_';/\$table_prefix = '$MYSQL_TABLE_PREFIX';/" $TMPCONFIG
 
-    sed -i "s/'AUTH_KEY', *'put your unique phrase here'/'AUTH_KEY', '`secret`'/" wp-content/wp-config-temp.php
-    sed -i "s/'SECURE_AUTH_KEY', *'put your unique phrase here'/'SECURE_AUTH_KEY', '`secret`'/" wp-content/wp-config-temp.php
-    sed -i "s/'LOGGED_IN_KEY', *'put your unique phrase here'/'LOGGED_IN_KEY', '`secret`'/" wp-content/wp-config-temp.php
-    sed -i "s/'NONCE_KEY', *'put your unique phrase here'/'NONCE_KEY', '`secret`'/" wp-content/wp-config-temp.php
-    sed -i "s/'AUTH_SALT', *'put your unique phrase here'/'AUTH_SALT', '`secret`'/" wp-content/wp-config-temp.php
-    sed -i "s/'SECURE_AUTH_SALT', *'put your unique phrase here'/'SECURE_AUTH_SALT', '`secret`'/" wp-content/wp-config-temp.php
-    sed -i "s/'LOGGED_IN_SALT', *'put your unique phrase here'/'LOGGED_IN_SALT', '`secret`'/" wp-content/wp-config-temp.php
-    sed -i "s/'NONCE_SALT', *'put your unique phrase here'/'NONCE_SALT', '`secret`'/" wp-content/wp-config-temp.php
+    sed -i "s/'AUTH_KEY', *'put your unique phrase here'/'AUTH_KEY', '`secret`'/" $TMPCONFIG
+    sed -i "s/'SECURE_AUTH_KEY', *'put your unique phrase here'/'SECURE_AUTH_KEY', '`secret`'/" $TMPCONFIG
+    sed -i "s/'LOGGED_IN_KEY', *'put your unique phrase here'/'LOGGED_IN_KEY', '`secret`'/" $TMPCONFIG
+    sed -i "s/'NONCE_KEY', *'put your unique phrase here'/'NONCE_KEY', '`secret`'/" $TMPCONFIG
+    sed -i "s/'AUTH_SALT', *'put your unique phrase here'/'AUTH_SALT', '`secret`'/" $TMPCONFIG
+    sed -i "s/'SECURE_AUTH_SALT', *'put your unique phrase here'/'SECURE_AUTH_SALT', '`secret`'/" $TMPCONFIG
+    sed -i "s/'LOGGED_IN_SALT', *'put your unique phrase here'/'LOGGED_IN_SALT', '`secret`'/" $TMPCONFIG
+    sed -i "s/'NONCE_SALT', *'put your unique phrase here'/'NONCE_SALT', '`secret`'/" $TMPCONFIG
 
     if [ x"$WORDPRESS_ALLOW_MULTISITE" = x"true" ]; then
         sed -i "/'DB_COLLATE', *'');/a\
-define('WP_ALLOW_MULTISITE', 'true');" wp-content/wp-config-temp.php
+define('WP_ALLOW_MULTISITE', 'true');" $TMPCONFIG
 
 	case "$WORDPRESS_MULTISITE_TYPE" in
 	    [Ss]ub-domains)
@@ -49,7 +49,7 @@ define('SUBDOMAIN_INSTALL', true);\
 define('DOMAIN_CURRENT_SITE', '$WORDPRESS_MULTISITE_HOST');\
 define('PATH_CURRENT_SITE', '/');\
 define('SITE_ID_CURRENT_SITE', 1);\
-define('BLOG_ID_CURRENT_SITE', 1);" wp-content/wp-config-temp.php
+define('BLOG_ID_CURRENT_SITE', 1);" $TMPCONFIG
 		;;
 	    [Ss]ub-directories)
         sed -i "/'DB_COLLATE', *'');/a\
@@ -57,29 +57,28 @@ define('SUBDOMAIN_INSTALL', false);\
 define('DOMAIN_CURRENT_SITE', '$WORDPRESS_MULTISITE_HOST');\
 define('PATH_CURRENT_SITE', '/');\
 define('SITE_ID_CURRENT_SITE', 1);\
-define('BLOG_ID_CURRENT_SITE', 1);" wp-content/wp-config-temp.php
+define('BLOG_ID_CURRENT_SITE', 1);" $TMPCONFIG
 		;;
 	    *)
 		;;
         esac
     fi
 
-    mv wp-content/wp-config-temp.php wp-content/wp-config.php
+    mv $TMPCONFIG /opt/app-root/data/wp-config.php
 fi
 
-# Link the previously generated wp-config.php from the wp-content diretcory
+# Link the previously generated wp-config.php from the persistent volume
 # into location WordPress is expecting it.
 
-ln -s wp-content/wp-config.php wp-config.php
+ln -s /opt/app-root/data/wp-config.php wp-config.php
 
 # Check whether the .htaccess file has been generated previously. If not
-# then we need to generate it. This is placed in the wp-content directory
-# on basis that it is in persistent storage.
+# then we need to generate it. This is placed in the persistent volume.
 
-if [ ! -f wp-content/wp-htaccess ]; then
+if [ ! -f /opt/app-root/data/.htaccess ]; then
     case "$WORDPRESS_MULTISITE_TYPE" in
         [Ss]ub-domains)
-            cat > wp-content/wp-htaccess << !
+            cat > /opt/app-root/data/.htaccess << !
 # BEGIN WordPress
 RewriteEngine On
 RewriteBase /
@@ -98,7 +97,7 @@ RewriteRule . index.php [L]
 !
             ;;
         [Ss]ub-directories)
-            cat > wp-content/wp-htaccess << !
+            cat > /opt/app-root/data/.htaccess << !
 # BEGIN WordPress
 RewriteEngine On
 RewriteBase /
@@ -117,7 +116,7 @@ RewriteRule . index.php [L]
 !
             ;;
         *)
-            cat > wp-content/wp-htaccess << !
+            cat > /opt/app-root/data/.htaccess << !
 # BEGIN WordPress
 <IfModule mod_rewrite.c>
 RewriteEngine On
@@ -133,10 +132,10 @@ RewriteRule . /index.php [L]
     esac
 fi
 
-# Link the previously generated .htaccess from the wp-content diretcory
+# Link the previously generated .htaccess from the persistent volume
 # into location WordPress is expecting it.
 
-ln -s wp-content/wp-htaccess .htaccess
+ln -s /opt/app-root/data/.htaccess .htaccess
 
 # Execute the original run script, replacing this script as current process.
 

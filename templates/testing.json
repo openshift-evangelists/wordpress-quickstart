@@ -232,8 +232,8 @@
                                 "volumeMounts": [
                                     {
                                         "name": "data",
-                                        "mountPath": "/opt/app-root/src/wp-content",
-                                        "subPath": "wordpress-content"
+                                        "mountPath": "/opt/app-root/data",
+                                        "subPath": "wordpress-data"
                                     }
                                 ]
                             },

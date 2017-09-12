@@ -9,11 +9,28 @@ set -eo pipefail
 
 /usr/libexec/s2i/assemble
 
+# Create a directory to act as the mount point for the persistent volume.
+
+mkdir /opt/app-root/data
+
 # Tar up a copy of the original wp-content directory so we can restore
 # it when the WordPress image is started up the first time and the
-# wp-content directory has been replaced with a persistent volume.
+# persistent volume mounted.
 
-tar cvf wp-content.tar wp-content
+tar cf /opt/app-root/wp-content.tar wp-content
+
+# Also copy the original wp-content directory into the directory used as
+# the mount point for the persistent volume just in case image not run
+# with a persistent volume.
+
+cp -rp wp-content /opt/app-root/data/wp-content
+
+# Remove the original wp-content directory and replace it with a symlink
+# to where it resides under the persistent volume.
+
+rm -r wp-content
+
+ln -s /opt/app-root/data/wp-content wp-content
 
 # Edit the wp-config-sample.php to allow plugins and themes to be
 # installed directly into file system.

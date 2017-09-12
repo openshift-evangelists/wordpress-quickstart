@@ -255,6 +255,10 @@
                                         "value": "${WORDPRESS_ALLOW_MULTISITE}"
                                     },
                                     {
+                                        "name": "WORDPRESS_MULTISITE_HOST",
+                                        "value": "${WORDPRESS_MULTISITE_HOST}"
+                                    },
+                                    {
                                         "name": "WORDPRESS_MULTISITE_TYPE",
                                         "value": "${WORDPRESS_MULTISITE_TYPE}"
                                     }
@@ -262,7 +266,7 @@
                                 "volumeMounts": [
                                     {
                                         "name": "data",
-                                        "mountPath": "/opt/app-root/src/wp-content"
+                                        "mountPath": "/opt/app-root/data"
                                     }
                                 ]
                             }
