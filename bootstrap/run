@@ -6,7 +6,7 @@ set -eo pipefail
 
 # Ensure the wp-content directory exists in the persistent volume.
 
-mkdir /opt/app-root/data/wp-content
+mkdir -p /opt/app-root/data/wp-content
 
 # Check the wp-content directory and if the plugins and themes directories
 # do not exist, restore the contents of the directory from the tarball we
