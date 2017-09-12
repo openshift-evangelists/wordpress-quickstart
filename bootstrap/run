@@ -45,6 +45,7 @@ if [ ! -f /opt/app-root/data/wp-config.php ]; then
     if [ x"$WORDPRESS_ALLOW_MULTISITE" = x"true" ]; then
         sed -i "/'DB_COLLATE', *'');/a\
 define('WP_ALLOW_MULTISITE', 'true');" $TMPCONFIG
+    fi
 
     mv $TMPCONFIG /opt/app-root/data/wp-config.php
 fi
