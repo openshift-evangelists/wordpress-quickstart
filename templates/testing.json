@@ -2,9 +2,9 @@
     "kind": "Template",
     "apiVersion": "v1",
     "metadata": {
-        "name": "wordpress-separate-apps",
+        "name": "wordpress-testing",
 	"annotations": {
-	    "description": "WordPress (Separate Apps)",
+	    "description": "WordPress (Testing)",
 	    "tags": "instant-app,wordpress"
 	}
     },
@@ -17,14 +17,8 @@
             "required": true
         },
         {
-            "name": "DATABASE_VOLUME_SIZE",
-            "description": "Size of the persistent volume for the database.",
-            "value": "1Gi",
-            "required": true
-        },
-        {
-            "name": "WORDPRESS_VOLUME_SIZE",
-            "description": "Size of the persistent volume for Wordpress.",
+            "name": "DATA_VOLUME_SIZE",
+            "description": "Size of the persistent volume for all data.",
             "value": "1Gi",
             "required": true
         },
@@ -61,7 +55,7 @@
         {
             "name": "WORDPRESS_VERSION",
             "description": "The tagged version of WordPress to use.",
-            "value": "4.8-branch",
+            "value": "4.8.1",
             "required": true
         },
         {
@@ -161,6 +155,20 @@
                                 "name": "${APPLICATION_NAME}-img:latest"
                             }
                         }
+                    },
+                    {
+                        "type": "ImageChange",
+                        "imageChangeParams": {
+                            "automatic": true,
+                            "containerNames": [
+                                "mysql"
+                            ],
+                            "from": {
+                                "kind": "ImageStreamTag",
+                                "namespace": "openshift",
+                                "name": "mysql:${MYSQL_VERSION}"
+                            }
+                        }
                     }
                 ],
                 "replicas": 1,
@@ -180,7 +188,7 @@
                             {
                                 "name": "data",
                                 "persistentVolumeClaim": {
-                                    "claimName": "${APPLICATION_NAME}-wordpress-data"
+                                    "claimName": "${APPLICATION_NAME}-data"
                                 }
                             }
                         ],
@@ -214,7 +222,7 @@
                                     },
                                     {
                                         "name": "MYSQL_HOST",
-                                        "value": "${APPLICATION_NAME}-db"
+                                        "value": "127.0.0.1"
                                     },
                                     {
                                         "name": "MYSQL_TABLE_PREFIX",
@@ -224,69 +232,11 @@
                                 "volumeMounts": [
                                     {
                                         "name": "data",
-                                        "mountPath": "/opt/app-root/src/wp-content"
+                                        "mountPath": "/opt/app-root/src/wp-content",
+                                        "subPath": "wordpress-content"
                                     }
                                 ]
-                            }
-                        ]
-                    }
-                }
-            }
-        },
-        {
-            "kind": "DeploymentConfig",
-            "apiVersion": "v1",
-            "metadata": {
-                "name": "${APPLICATION_NAME}-db",
-                "labels": {
-                    "app": "${APPLICATION_NAME}"
-                }
-            },
-            "spec": {
-                "strategy": {
-                    "type": "Recreate"
-                },
-                "triggers": [
-                    {
-                        "type": "ConfigChange"
-                    },
-                    {
-                        "type": "ImageChange",
-                        "imageChangeParams": {
-                            "automatic": true,
-                            "containerNames": [
-                                "mysql"
-                            ],
-                            "from": {
-                                "kind": "ImageStreamTag",
-                                "namespace": "openshift",
-                                "name": "mysql:${MYSQL_VERSION}"
-                            }
-                        }
-                    }
-                ],
-                "replicas": 1,
-                "selector": {
-                    "app": "${APPLICATION_NAME}",
-                    "deploymentconfig": "${APPLICATION_NAME}-db"
-                },
-                "template": {
-                    "metadata": {
-                        "labels": {
-                            "app": "${APPLICATION_NAME}",
-                            "deploymentconfig": "${APPLICATION_NAME}-db"
-                        }
-                    },
-                    "spec": {
-                        "volumes": [
-                            {
-                                "name": "data",
-                                "persistentVolumeClaim": {
-                                    "claimName": "${APPLICATION_NAME}-mysql-data"
-                                }
-                            }
-                        ],
-                        "containers": [
+                            },
                             {
                                 "name": "mysql",
                                 "image": "centos/mysql-57-centos7",
@@ -318,7 +268,8 @@
                                 "volumeMounts": [
                                     {
                                         "name": "data",
-                                        "mountPath": "/var/lib/mysql/data"
+                                        "mountPath": "/var/lib/mysql/data",
+                                        "subPath": "mysql-database"
                                     }
                                 ]
                             }
@@ -339,6 +290,12 @@
             "spec": {
                 "ports": [
                     {
+                        "name": "3306-tcp",
+                        "protocol": "TCP",
+                        "port": 3306,
+                        "targetPort": 3306
+                    },
+                    {
                         "name": "8080-tcp",
                         "protocol": "TCP",
                         "port": 8080,
@@ -348,30 +305,6 @@
                 "selector": {
                     "app": "${APPLICATION_NAME}",
                     "deploymentconfig": "${APPLICATION_NAME}"
-                }
-            }
-        },
-        {
-            "kind": "Service",
-            "apiVersion": "v1",
-            "metadata": {
-                "name": "${APPLICATION_NAME}-db",
-                "labels": {
-                    "app": "${APPLICATION_NAME}"
-                }
-            },
-            "spec": {
-                "ports": [
-                    {
-                        "name": "3306-tcp",
-                        "protocol": "TCP",
-                        "port": 3306,
-                        "targetPort": 3306
-                    }
-                ],
-                "selector": {
-                    "app": "${APPLICATION_NAME}",
-                    "deploymentconfig": "${APPLICATION_NAME}-db"
                 }
             }
         },
@@ -404,7 +337,7 @@
             "kind": "PersistentVolumeClaim",
             "apiVersion": "v1",
             "metadata": {
-                "name": "${APPLICATION_NAME}-mysql-data"
+                "name": "${APPLICATION_NAME}-data"
             },
             "spec": {
                 "accessModes": [
@@ -412,24 +345,7 @@
                 ],
                 "resources": {
                     "requests": {
-                        "storage": "${DATABASE_VOLUME_SIZE}"
-                    }
-                }
-            }
-        },
-        {
-            "kind": "PersistentVolumeClaim",
-            "apiVersion": "v1",
-            "metadata": {
-                "name": "${APPLICATION_NAME}-wordpress-data"
-            },
-            "spec": {
-                "accessModes": [
-                    "ReadWriteOnce"
-                ],
-                "resources": {
-                    "requests": {
-                        "storage": "${WORDPRESS_VOLUME_SIZE}"
+                        "storage": "${DATA_VOLUME_SIZE}"
                     }
                 }
             }
