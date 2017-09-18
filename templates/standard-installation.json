@@ -26,19 +26,19 @@
         },
         {
             "name": "WORDPRESS_VOLUME_SIZE",
-            "description": "Size of the persistent volume for Wordpress.",
+            "description": "Size of the persistent volume for WordPress.",
             "value": "1Gi",
             "required": true
         },
         {
             "name": "WORDPRESS_VOLUME_TYPE",
-            "description": "Type of the persistent volume for Wordpress.",
+            "description": "Type of the persistent volume for WordPress.",
             "value": "ReadWriteOnce",
             "required": true
         },
         {
             "name": "WORDPRESS_DEPLOYMENT_STRATEGY",
-            "description": "Type of the deployment strategy for Wordpress.",
+            "description": "Type of the deployment strategy for WordPress.",
             "value": "Recreate",
             "required": true
         },
@@ -134,8 +134,7 @@
                             "kind": "ImageStreamTag",
                             "namespace": "openshift",
                             "name": "php:${PHP_VERSION}"
-                        },
-                        "scripts": "https://raw.githubusercontent.com/openshift-evangelists/wordpress-quickstart/master/bootstrap"
+                        }
                     }
                 },
                 "output": {
@@ -337,7 +336,7 @@
                         "containers": [
                             {
                                 "name": "mysql",
-                                "image": "centos/mysql-57-centos7",
+                                "image": "mysql:5.7",
                                 "ports": [
                                     {
                                         "containerPort": 3306,

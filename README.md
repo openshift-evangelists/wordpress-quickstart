@@ -92,3 +92,7 @@ Testing Environment
 -------------------
 
 If you want to play with WordPress to test out features, validate data migration steps etc, you can use the _WordPress (Testing Environment)_ template. In this configuration, only a single persistent volume is required as the WordPress instance and the MySQL database are run together in the same pod and will share the one persistent volume. In this configuration, you can never scale WordPress up to more than 1 replica, nor enable rolling deployment strategy, even if you have _ReadWriteMany_ persistent volume type available. This restriction exists as scaling up WordPress will also scale up the number of MySQL database instances which would result in database corruption. This configuration is only recommended for testing.
+
+Additional Resources
+-------------------
+Documentation for WordPress can be found on the [WordPress website](https://codex.wordpress.org/Main_Page). Check out the Red Hat Software Collections [PHP S2I documentation](https://github.com/sclorg/s2i-php-container/tree/master/7.0) for considerations when using the PHP 7.0 S2I container image.

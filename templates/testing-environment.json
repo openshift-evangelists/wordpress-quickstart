@@ -116,8 +116,7 @@
                             "kind": "ImageStreamTag",
                             "namespace": "openshift",
                             "name": "php:${PHP_VERSION}"
-                        },
-                        "scripts": "https://raw.githubusercontent.com/openshift-evangelists/wordpress-quickstart/master/bootstrap"
+                        }
                     }
                 },
                 "output": {
@@ -275,7 +274,7 @@
                             },
                             {
                                 "name": "mysql",
-                                "image": "centos/mysql-57-centos7",
+                                "image": "mysql:5.7",
                                 "ports": [
                                     {
                                         "containerPort": 3306,
