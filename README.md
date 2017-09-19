@@ -5,51 +5,55 @@ This repository implements a way of quickly deploying WordPress to OpenShift 3.
 
 Provided in the repository are OpenShift templates for deploying WordPress in a number of different configurations suitable for production and testing environments.
 
-The build configurations created from these templates will pull Source-to-Image (S2I) scripts from this repository which customize the build process for the WordPress application when run through the PHP S2I builder, and the startup process for WordPress when the application is subsequently deployed.
+These include the ability to deploy a self contained standalone instance of WordPress where all data related to the instance is maintained in a persistent volume. Plus, the ability to deploy an instance of WordPress where plugins, themes and language files can be stored in a source code repository and incorporated into the WordPress instance by re-building the application to include them.
 
-Because the repository contains custom S2I scripts, which will be pulled down every time a re-build of the application image occurs, it is recommended that you create your own fork of the repository, and update your copy of the templates to refer to the scripts from your fork. This will ensure that you are using a stable version of the scripts and will not be affected by future changes made to this repository. You can update your fork from this repository later if you need future changes which may be made.
-
-Forking the Repository
-----------------------
+Because the repository contains custom S2I scripts, which will be pulled down every time a re-build of the application image occurs, it is recommended that you create your own fork of the repository and work from it. This will ensure that you are using a stable version of the scripts and will not be affected by future changes made to this repository. You can update your fork from this repository later if you need future changes which may be made.
 
 To fork the repository, use the **Fork** button on the home page for this repository on GitHub.
 
-Once you have forked the repository, edit the following template files:
+Creating the WordPress Image
+----------------------------
 
-* [templates/standard-installation.json](templates/standard-installation.json)
-* [templates/testing-environment.json](templates/testing-environment.json)
+The primary purpose of this source repository is to provide a way to build an image containing the bits required to run WordPress.
 
-Search for the ``bc.spec.strategy.sourceStrategy.scripts`` field and change ``openshift-evangelists`` to the name of the GitHub account in which you created the fork of this repository. This will ensure that the S2I scripts are pulled from your copy of the repository.
+The image created actually serves two purposes.
+
+The first is that the image can be deployed directly as is if it were an application image. In this case it will result in a self contained standalone WordPress instance.
+
+The second is to use the image as a S2I builder image. In this case a build would be run against a source repository containing plugins, themes and language files. This would be incorporated into the WordPress instance.
+
+The latter would be used where you have a need to develop your own plugins, themes and language files and want them under version control in a source repository.
+
+To create the WordPress image run the command:
+
+```
+oc new-build --name wordpress php:7.0~https://github.com/openshift-evangelists/wordpress-quickstart
+```
+
+In this example the URL of the original for this source repository is used. If you have created a fork of this repository, ensure you use the URL for your fork.
+
+This will by default create an image which uses the latest version of WordPress available.
 
 Loading the Templates
 ---------------------
 
-To load the templates into OpenShift, you can use the command line or the web console.
+Although you can use the WordPress image directly, manually setting all the required environment variables and linking it to a database, it is easier to use the provided templates to deploy it.
 
-On the command line run:
-
-```
-oc create -f templates/standard-installation.json
-oc create -f templates/testing-environment.json
-```
-
-This will create the templates:
+To load the templates into OpenShift from the command line you can run:
 
 ```
-wordpress-standard-installation
-wordpress-testing-environment
+oc create -f templates/standard-standalone.json
+oc create -f templates/standard-extensible.json
 ```
-
-From the web console select _Add to Project_ and then _Import YAML / JSON_. Upload each template or cut and paste its contents into the form. When asked whether you wish to process the template or update the template, select _Update template_ so that it will be available under _Browse Catalog_ when selecting _Add to Project_.
 
 Deploying WordPress
 -------------------
 
-To deploy a fresh WordPress instance, from the web console select _Add to Project_. Under _Browse Catalog_, select _PHP_. You should be present with options for the templates you loaded.
+To deploy a fresh WordPress instance, from the web console select _Add to Project_. Under _Browse Catalog_, select _PHP_. You should be presented with options for the templates you loaded.
 
-![Browse Catalog](./screenshots/browse-catalog-wordpress.png)
+![Deployment Options](./screenshots/browse-catalog-wordpress.png)
 
-Of these options, you should use _WordPress (Standard Installation)_. This option will create a typical standard installation for running WordPress.
+Of these options, select _WordPress (Standard Standalone)_. This option will create a typical standard installation for running WordPress where everything is self contained within the persistent volume.
 
 The configuration requires two persistent volumes be available. The default persistent volume type used for WordPress data will be _ReadWriteOnce_. This is the type of persistent volume which is normally available in OpenShift clusters hosted on cloud environments such as AWS, Google and Azure. This includes the hosted OpenShift Online service provided by Red Hat.
 
@@ -57,11 +61,11 @@ When this persistent volume type is all that is available, the WordPress instanc
 
 If your OpenShift cluster has persistent volumes of type _ReadWriteMany_, you can instead use this persistent volume type. When this persistent volume type is used, you can scale up WordPress to more than 1 replica, and also enable _Rolling_ deployment strategy.
 
-Select _WordPress (Standard Installation)_ and you will be presented with a form to fill out details for the WordPress instance to be created.
+Select _WordPress (Standard Standalone)_ and you will be presented with a form to fill out details for the WordPress instance to be created.
 
-![Standard Installation](./screenshots/wordpress-standard-installation.png)
+![Standard Installation](./screenshots/wordpress-standard-standalone.png)
 
-Change the name of the WordPress instance if desired, as well as override the WordPress version and repository from which to pull the WordPress source code.
+Change the name of the WordPress instance if desired.
 
 You can optionally set the database username and password. If you do not, these will automatically be filled in with generated values. You can retrieve the values later from the environment settings of the deployment configuration if you need to access the MySQL database directly. You do not need to know the values of the database username and password when doing the deployment.
 
@@ -91,4 +95,11 @@ You can now log in to your WordPress instance and start using it.
 Testing Environment
 -------------------
 
-If you want to play with WordPress to test out features, validate data migration steps etc, you can use the _WordPress (Testing Environment)_ template. In this configuration, only a single persistent volume is required as the WordPress instance and the MySQL database are run together in the same pod and will share the one persistent volume. In this configuration, you can never scale WordPress up to more than 1 replica, nor enable rolling deployment strategy, even if you have _ReadWriteMany_ persistent volume type available. This restriction exists as scaling up WordPress will also scale up the number of MySQL database instances which would result in database corruption. This configuration is only recommended for testing.
+If you want to play with WordPress to test out features, validate data migration steps etc, you can use test variants of the templates. These templates can be loaded by running:
+
+```
+oc create -f templates/testing-standalone.json
+oc create -f templates/testing-extensible.json
+```
+
+For these configurations, only a single persistent volume is required as the WordPress instance and the MySQL database are run together in the same pod and will share the one persistent volume. With these configurations, you can never scale WordPress up to more than 1 replica, nor enable rolling deployment strategy, even if you have _ReadWriteMany_ persistent volume type available. This restriction exists as scaling up WordPress will also scale up the number of MySQL database instances which would result in database corruption. These configurations are only recommended for testing.

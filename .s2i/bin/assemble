@@ -1,0 +1,56 @@
+#!/bin/bash
+
+set -x
+
+set -eo pipefail
+
+# During this initial build phase we are going to construct a new custom
+# image based off the default PHP S2I builder. The resulting image can be
+# run directly to create a standalone instance of WordPress not linked to
+# anything, or it can be run as a S2I builder so that plugins, themes and
+# language files can be pulled down from a repository and incorporated into
+# the WordPress installation.
+
+# Use latest stable version of WordPress if no version is specified.
+
+if [ -z "$WORDPRESS_INSTALL_VERSION" ]; then
+  WORDPRESS_INSTALL_VERSION=$(curl -s "https://api.wordpress.org/core/version-check/1.7/?version=4.1" | python -c 'import sys, json; latest = json.load(sys.stdin)["offers"][0]; print(latest["version"] if latest["response"] == "upgrade" else "4.1")')
+fi
+
+# Download WordPress.
+
+mkdir -p /opt/app-root/downloads
+
+curl -Ls http://wordpress.org/wordpress-${WORDPRESS_INSTALL_VERSION}.tar.gz > /opt/app-root/downloads/wordpress.tar.gz
+echo ${WORDPRESS_INSTALL_VERSION} > /opt/app-root/downloads/wordpress-version.txt
+
+# Verify the WordPress sources.
+
+TARBALL_MD5=$(md5sum /opt/app-root/downloads/wordpress.tar.gz | cut -d ' ' -f 1)
+EXPECTS_MD5=$(curl -Ls http://wordpress.org/wordpress-${WORDPRESS_INSTALL_VERSION}.tar.gz.md5)
+
+if [ "${TARBALL_MD5}" != "${EXPECTS_MD5}" ]; then
+    echo "ERROR: WordPress ${WORDPRESS_INSTALL_VERSION} MD5 checksum mismatch. The WordPress tar file that was downloaded does not match the signature that it was expected to have."
+    exit 1
+fi
+
+# This S2I assemble script is only used when creating the custom image.
+# For when running the image, or using it as a S2I builder, we use a second
+# set of custom S2I scripts. We now need to move these into the correct
+# location and have the custom image use those.
+
+mkdir -p /opt/app-root/s2i
+
+mv /tmp/src/builder/assemble /opt/app-root/s2i/assemble
+mv /tmp/src/builder/run /opt/app-root/s2i/run
+mv /tmp/src/builder/save-artifacts /opt/app-root/s2i/save-artifacts
+
+mkdir -p /tmp/.s2i
+
+mv /tmp/src/builder/image_metadata.json /tmp/.s2i/image_metadata.json
+
+rm -rf /tmp/src
+
+# Fixup permissions on directories and files.
+
+fix-permissions /opt/app-root

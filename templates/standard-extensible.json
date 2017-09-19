@@ -2,10 +2,10 @@
     "kind": "Template",
     "apiVersion": "v1",
     "metadata": {
-        "name": "wordpress-standard-installation",
+        "name": "wordpress-standard-extensible",
 	"annotations": {
-            "openshift.io/display-name": "WordPress (Standard Installation)",
-	    "description": "Creates a WordPress installation with separate MySQL database instance. Requires that two persistent volumes be available. If a ReadWriteMany persistent volume type is available and used, WordPress can be scaled to multiple replicas and the deployment strategy switched to Rolling to permit rolling deployments on restarts.",
+            "openshift.io/display-name": "WordPress (Standard Extensible)",
+	    "description": "Creates an extensible WordPress installation with separate MySQL database instance. Plugins, themes and language files are incorporated from a source code repository. Requires that two persistent volumes be available. If a ReadWriteMany persistent volume type is available and used, WordPress can be scaled to multiple replicas and the deployment strategy switched to Rolling to permit rolling deployments on restarts.",
 	    "tags": "quickstart,php,wordpress",
             "iconClass": "icon-php"
 	}
@@ -14,8 +14,26 @@
         {
             "name": "APPLICATION_NAME",
             "description": "The name of the WordPress instance.",
-            "value": "wordpress",
+            "value": "my-wordpress-site",
             "from": "[a-zA-Z0-9]",
+            "required": true
+        },
+        {
+            "name": "WORDPRESS_BUILDER_IMAGE",
+            "description": "The name of the WordPress builder image.",
+            "value": "wordpress",
+            "required": true
+        },
+        {
+            "name": "SOURCE_REPOSITORY",
+            "description": "The source repository containing plugins, themes and language files.",
+            "value": "",
+            "required": true
+        },
+        {
+            "name": "SOURCE_REPOSITORY_TAG",
+            "description": "The tagged version of the source repository to use.",
+            "value": "master",
             "required": true
         },
         {
@@ -67,24 +85,6 @@
 	    "generate": "expression"
 	},
         {
-            "name": "WORDPRESS_REPOSITORY",
-            "description": "The source repository containing WordPress.",
-            "value": "https://github.com/WordPress/WordPress",
-            "required": true
-        },
-        {
-            "name": "WORDPRESS_VERSION",
-            "description": "The tagged version of WordPress to use.",
-            "value": "4.8.1",
-            "required": true
-        },
-        {
-            "name": "PHP_VERSION",
-            "description": "The version of PHP to run WordPress.",
-            "value": "7.0",
-            "required": true
-        },
-        {
             "name": "MYSQL_VERSION",
             "description": "The version of the MySQL database.",
             "value": "5.7",
@@ -123,8 +123,8 @@
                 "source": {
                     "type": "Git",
                     "git": {
-                        "uri": "${WORDPRESS_REPOSITORY}",
-                        "ref": "${WORDPRESS_VERSION}"
+                        "uri": "${SOURCE_REPOSITORY}",
+                        "ref": "${SOURCE_REPOSITORY_TAG}"
                     }
                 },
                 "strategy": {
@@ -132,10 +132,8 @@
                     "sourceStrategy": {
                         "from": {
                             "kind": "ImageStreamTag",
-                            "namespace": "openshift",
-                            "name": "php:${PHP_VERSION}"
-                        },
-                        "scripts": "https://raw.githubusercontent.com/openshift-evangelists/wordpress-quickstart/master/bootstrap"
+                            "name": "${WORDPRESS_BUILDER_IMAGE}:latest"
+                        }
                     }
                 },
                 "output": {
@@ -272,7 +270,7 @@
                                 "volumeMounts": [
                                     {
                                         "name": "data",
-                                        "mountPath": "/opt/app-root/data"
+                                        "mountPath": "/opt/app-root/src"
                                     }
                                 ]
                             }
@@ -337,7 +335,7 @@
                         "containers": [
                             {
                                 "name": "mysql",
-                                "image": "centos/mysql-57-centos7",
+                                "image": "mysql",
                                 "ports": [
                                     {
                                         "containerPort": 3306,
@@ -467,7 +465,10 @@
             "kind": "PersistentVolumeClaim",
             "apiVersion": "v1",
             "metadata": {
-                "name": "${APPLICATION_NAME}-mysql-data"
+                "name": "${APPLICATION_NAME}-mysql-data",
+                "labels": {
+                    "app": "${APPLICATION_NAME}"
+                }
             },
             "spec": {
                 "accessModes": [
@@ -484,7 +485,10 @@
             "kind": "PersistentVolumeClaim",
             "apiVersion": "v1",
             "metadata": {
-                "name": "${APPLICATION_NAME}-wordpress-data"
+                "name": "${APPLICATION_NAME}-wordpress-data",
+                "labels": {
+                    "app": "${APPLICATION_NAME}"
+                }
             },
             "spec": {
                 "accessModes": [

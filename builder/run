@@ -4,16 +4,28 @@ set -x
 
 set -eo pipefail
 
-# Ensure the wp-content directory exists in the persistent volume.
+# If WordPress has not been installed yet, unpack it.
 
-mkdir -p /opt/app-root/data/wp-content
+if [ ! -f wp-config-sample.php ]; then
+    tar --strip-components=1 -xzf /opt/app-root/downloads/wordpress.tar.gz
 
-# Check the wp-content directory and if the plugins and themes directories
-# do not exist, restore the contents of the directory from the tarball we
-# created in the assemble script.
+    # Edit the wp-config-sample.php to allow plugins and themes to be
+    # installed directly into file system.
 
-if [ ! -d wp-content/plugins -a ! -d wp-content/themes ]; then
-    tar -C wp-content -xvf /opt/app-root/wp-content.tar
+    sed -i "/'DB_COLLATE', *'');/a\
+    define('FS_METHOD', 'direct');" wp-config-sample.php
+
+    # Edit the wp-config-sample.php to force use of a secure connection
+    # for login and adminstration.
+
+    sed -i "/'DB_COLLATE', *'');/a\
+    define( 'FORCE_SSL_ADMIN', true );" wp-config-sample.php
+
+    # Edit the wp-config-sample.php to ensure that static files are served
+    # up over same protocol as request to avoid mixed content errors.
+
+    sed -i "/'DB_COLLATE', *'');/a\
+    if (strpos(\$_SERVER['HTTP_X_FORWARDED_PROTO'], 'https') !== false) \$_SERVER['HTTPS']='on';" wp-config-sample.php
 fi
 
 # Check whether the wp-config.php file has been generated previously. If
@@ -23,8 +35,8 @@ secret() {
     python -c 'import random; import string; print("".join([random.SystemRandom().choice(string.ascii_letters+string.digits) for i in range(50)]))'
 }
 
-if [ ! -f /opt/app-root/data/wp-config.php ]; then
-    TMPCONFIG=/opt/app-root/data/wp-config-temp.php
+if [ ! -f wp-config.php ]; then
+    TMPCONFIG=/tmp/wp-config-temp.php
     cp wp-config-sample.php $TMPCONFIG
 
     sed -i "s/'DB_NAME', *'database_name_here'/'DB_NAME', '$MYSQL_DATABASE'/" $TMPCONFIG
@@ -42,36 +54,26 @@ if [ ! -f /opt/app-root/data/wp-config.php ]; then
     sed -i "s/'LOGGED_IN_SALT', *'put your unique phrase here'/'LOGGED_IN_SALT', '`secret`'/" $TMPCONFIG
     sed -i "s/'NONCE_SALT', *'put your unique phrase here'/'NONCE_SALT', '`secret`'/" $TMPCONFIG
 
-    mv $TMPCONFIG /opt/app-root/data/wp-config.php
+    mv $TMPCONFIG wp-config.php
 fi
 
-# Link the previously generated wp-config.php from the persistent volume
-# into location WordPress is expecting it.
+# Copy user provided plugins, themes and languages into the persistent
+# volume. This happens every time the image is started, which is not ideal.
+# If application is scaled, then could also occur from multple replicas
+# at the same time. No obvious way to avoid that, so outstanding question
+# as to whether that will cause any issues.
 
-ln -s /opt/app-root/data/wp-config.php wp-config.php
-
-# Check whether the .htaccess file has been generated previously. If not
-# then we need to generate it. This is placed in the persistent volume.
-
-if [ ! -f /opt/app-root/data/.htaccess ]; then
-    cat > /opt/app-root/data/.htaccess << !
-# BEGIN WordPress
-<IfModule mod_rewrite.c>
-RewriteEngine On
-RewriteBase /
-RewriteRule ^index\\.php$ - [L]
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule . /index.php [L]
-</IfModule>
-# END WordPress
-!
+if [ -d /opt/app-root/downloads/plugins ]; then
+    cp -rf /opt/app-root/downloads/plugins/* wp-content/plugins/ 2>/dev/null || true
 fi
 
-# Link the previously generated .htaccess from the persistent volume
-# into location WordPress is expecting it.
+if [ -d /opt/app-root/downloads/themes ]; then
+    cp -rf /opt/app-root/downloads/themes/* wp-content/themes/ 2>/dev/null || true
+fi
 
-ln -s /opt/app-root/data/.htaccess .htaccess
+if [ -d /opt/app-root/downloads/languages ]; then
+    cp -rf /opt/app-root/downloads/languages/* wp-content/languages/ 2>/dev/null || true
+fi
 
 # Execute the original run script, replacing this script as current process.
 
