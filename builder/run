@@ -57,11 +57,11 @@ if [ ! -f wp-config.php ]; then
     mv $TMPCONFIG wp-config.php
 fi
 
-# Copy user provided plugins, themes and languages into the persistent
-# volume. This happens every time the image is started, which is not ideal.
-# If application is scaled, then could also occur from multple replicas
-# at the same time. No obvious way to avoid that, so outstanding question
-# as to whether that will cause any issues.
+# Copy user provided plugins, themes, language files and configuration
+# files into the persistent volume. This happens every time the image is
+# started, which is not ideal. If application is scaled, then could also
+# occur from multple replicas at the same time. No obvious way to avoid
+# that, so outstanding question as to whether that will cause any issues.
 
 if [ -d /opt/app-root/downloads/plugins ]; then
     cp -rf /opt/app-root/downloads/plugins/* wp-content/plugins/ 2>/dev/null || true
@@ -73,6 +73,14 @@ fi
 
 if [ -d /opt/app-root/downloads/languages ]; then
     cp -rf /opt/app-root/downloads/languages/* wp-content/languages/ 2>/dev/null || true
+fi
+
+if [ -f /opt/app-root/downloads/configs/wp-config.php ]; then
+    cp -f /opt/app-root/downloads/configs/wp-config.php wp-config.php
+fi
+
+if [ -f /opt/app-root/downloads/configs/.htaccess ]; then
+    cp -f /opt/app-root/downloads/configs/.htaccess .htaccess
 fi
 
 # Execute the original run script, replacing this script as current process.
