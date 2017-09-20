@@ -2,10 +2,10 @@
     "kind": "Template",
     "apiVersion": "v1",
     "metadata": {
-        "name": "wordpress-testing-extensible",
+        "name": "wordpress-testing-repository",
 	"annotations": {
-            "openshift.io/display-name": "WordPress (Testing Extensible)",
-	    "description": "Creates an extensible WordPress installation with MySQL database instance running in the same deployment. Plugins, themes and language files are incorporated from a source code repository. Requires that a single persistent volume be available. Configuration only suitable for testing environments. Cannot be scaled.",
+            "openshift.io/display-name": "WordPress (Testing / Repository)",
+	    "description": "Creates a WordPress installation with MySQL database instance running in the same deployment. Plugins, themes and language files are incorporated from a source code repository. Requires that a single persistent volume be available. Configuration only suitable for testing environments. Cannot be scaled.",
 	    "tags": "quickstart,php,wordpress",
             "iconClass": "icon-php"
 	}

@@ -14,13 +14,11 @@ To fork the repository, use the **Fork** button on the home page for this reposi
 Creating the WordPress Image
 ----------------------------
 
-The primary purpose of this source repository is to provide a way to build an image containing the bits required to run WordPress.
-
-The image created actually serves two purposes.
+The primary purpose of this source repository is to provide a way to build an image containing the bits required to run WordPress. The image created will fulfil two roles.
 
 The first is that the image can be deployed directly as is if it were an application image. In this case it will result in a self contained standalone WordPress instance.
 
-The second is to use the image as a S2I builder image. In this case a build would be run against a source repository containing plugins, themes and language files. This would be incorporated into the WordPress instance.
+The second is to use the image as a S2I builder image. In this case a build would be run against a source repository containing plugins, themes and language files. These would be incorporated into the WordPress instance.
 
 The latter would be used where you have a need to develop your own plugins, themes and language files and want them under version control in a source repository.
 
@@ -42,8 +40,8 @@ Although you can use the WordPress image directly, manually setting all the requ
 To load the templates into OpenShift from the command line you can run:
 
 ```
-oc create -f templates/standard-standalone.json
-oc create -f templates/standard-extensible.json
+oc create -f templates/classic-standalone.json
+oc create -f templates/classic-repository.json
 ```
 
 Deploying WordPress
@@ -99,7 +97,7 @@ If you want to play with WordPress to test out features, validate data migration
 
 ```
 oc create -f templates/testing-standalone.json
-oc create -f templates/testing-extensible.json
+oc create -f templates/testing-repository.json
 ```
 
 For these configurations, only a single persistent volume is required as the WordPress instance and the MySQL database are run together in the same pod and will share the one persistent volume. With these configurations, you can never scale WordPress up to more than 1 replica, nor enable rolling deployment strategy, even if you have _ReadWriteMany_ persistent volume type available. This restriction exists as scaling up WordPress will also scale up the number of MySQL database instances which would result in database corruption. These configurations are only recommended for testing.
