@@ -5,9 +5,12 @@ This repository implements a way of quickly deploying WordPress to OpenShift 3.
 
 Provided in the repository are OpenShift templates for deploying WordPress in a number of different configurations suitable for production and testing environments.
 
-These include the ability to deploy a self contained standalone instance of WordPress where all data related to the instance is maintained in a persistent volume. Plus, the ability to deploy an instance of WordPress where plugins, themes and language files can be stored in a source code repository and incorporated into the WordPress instance by re-building the application to include them.
+When running, all data related to the WordPress instance is maintained in a persistent volume so it can be updated and changes retained. If the deployment is linked to a repository, you can have updates to plugins, themes and language files copied from a source code repository by re-building the application. This will allow you to keep the code for our own custom plugins and themes under version control.
 
-Because the repository contains custom S2I scripts, which will be pulled down every time a re-build of the application image occurs, it is recommended that you create your own fork of the repository and work from it. This will ensure that you are using a stable version of the scripts and will not be affected by future changes made to this repository. You can update your fork from this repository later if you need future changes which may be made.
+Fork this Repository First
+--------------------------
+
+Before using this repository, it is recommended that fork it and and use your copy. This will ensure that you are using a stable version of the scripts and will not be affected by future changes made to this repository. You can update your fork from this repository later if you need future changes which may be made.
 
 To fork the repository, use the **Fork** button on the home page for this repository on GitHub.
 
@@ -30,7 +33,7 @@ oc new-build --name wordpress php:7.0~https://github.com/openshift-evangelists/w
 
 In this example the URL of the original for this source repository is used. If you have created a fork of this repository, ensure you use the URL for your fork.
 
-This will by default create an image which uses the latest version of WordPress available.
+This will by default create an image which uses the latest version of WordPress available. The version of PHP used is dictated by the version of the PHP S2I builder you supply to the ``oc new-build`` command.
 
 Loading the Templates
 ---------------------
@@ -51,7 +54,7 @@ To deploy a fresh WordPress instance, from the web console select _Add to Projec
 
 ![Deployment Options](./screenshots/browse-catalog-wordpress.png)
 
-Of these options, select _WordPress (Standard Standalone)_. This option will create a typical standard installation for running WordPress where everything is self contained within the persistent volume.
+Of these options, select _WordPress (Classic / Standalone)_. This option will create an installation of WordPress where everything is self contained within the persistent volume.
 
 The configuration requires two persistent volumes be available. The default persistent volume type used for WordPress data will be _ReadWriteOnce_. This is the type of persistent volume which is normally available in OpenShift clusters hosted on cloud environments such as AWS, Google and Azure. This includes the hosted OpenShift Online service provided by Red Hat.
 
@@ -59,9 +62,9 @@ When this persistent volume type is all that is available, the WordPress instanc
 
 If your OpenShift cluster has persistent volumes of type _ReadWriteMany_, you can instead use this persistent volume type. When this persistent volume type is used, you can scale up WordPress to more than 1 replica, and also enable _Rolling_ deployment strategy.
 
-Select _WordPress (Standard Standalone)_ and you will be presented with a form to fill out details for the WordPress instance to be created.
+Select _WordPress (Classic / Standalone)_ and you will be presented with a form to fill out details for the WordPress instance to be created.
 
-![Standard Installation](./screenshots/wordpress-standard-standalone.png)
+![Standard Installation](./screenshots/wordpress-classic-standalone.png)
 
 Change the name of the WordPress instance if desired.
 
