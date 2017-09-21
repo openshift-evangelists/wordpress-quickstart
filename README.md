@@ -10,7 +10,7 @@ When running, all data related to the WordPress instance is maintained in a pers
 Fork this Repository First
 --------------------------
 
-Before using this repository, it is recommended that fork it and and use your copy. This will ensure that you are using a stable version of the scripts and will not be affected by future changes made to this repository. You can update your fork from this repository later if you need future changes which may be made.
+Before deploying WordPress using this repository, it is recommended that you fork it, then use your copy. This will ensure that you are using a stable version of the scripts and will not be affected by future changes made to this repository. You can update your fork from this repository later if you need future changes which may be made.
 
 To fork the repository, use the **Fork** button on the home page for this repository on GitHub.
 
