@@ -19,13 +19,13 @@
             "required": true
         },
         {
-            "name": "WORDPRESS_BUILDER_IMAGE",
-            "description": "The name of the WordPress builder image.",
-            "value": "wordpress",
+            "name": "QUICKSTART_REPOSITORY_URL",
+            "description": "The URL of the quickstart Git repository.",
+            "value": "https://github.com/openshift-evangelists/wordpress-quickstart",
             "required": true
         },
         {
-            "name": "SOURCE_REPOSITORY",
+            "name": "SOURCE_REPOSITORY_URL",
             "description": "The source repository containing plugins, themes and language files.",
             "value": "",
             "required": true
@@ -34,12 +34,6 @@
             "name": "SOURCE_REPOSITORY_TAG",
             "description": "The tagged version of the source repository to use.",
             "value": "master",
-            "required": true
-        },
-        {
-            "name": "DATABASE_VOLUME_SIZE",
-            "description": "Size of the persistent volume for the database.",
-            "value": "1Gi",
             "required": true
         },
         {
@@ -67,6 +61,12 @@
             "required": true
         },
         {
+            "name": "DATABASE_VOLUME_SIZE",
+            "description": "Size of the persistent volume for the database.",
+            "value": "1Gi",
+            "required": true
+        },
+        {
             "name": "DATABASE_MEMORY_LIMIT",
             "description": "Amount of memory available to the database.",
             "value": "512Mi",
@@ -89,9 +89,89 @@
             "description": "The version of the MySQL database.",
             "value": "5.7",
             "required": true
+        },
+        {
+            "name": "PHP_VERSION",
+            "description": "The version of the PHP builder.",
+            "value": "7.0",
+            "required": true
         }
     ],
     "objects": [
+        {
+            "kind": "ImageStream",
+            "apiVersion": "v1",
+            "metadata": {
+                "name": "${APPLICATION_NAME}-s2i",
+                "labels": {
+                    "app": "${APPLICATION_NAME}"
+                }
+            }
+        },
+        {
+            "kind": "BuildConfig",
+            "apiVersion": "v1",
+            "metadata": {
+                "name": "${APPLICATION_NAME}",
+                "labels": {
+                    "app": "${APPLICATION_NAME}"
+                }
+            },
+            "spec": {
+                "triggers": [
+                    {
+                        "type": "ConfigChange"
+                    },
+                    {
+                        "type": "ImageChange"
+                    }
+                ],
+                "source": {
+                    "type": "Git",
+                    "git": {
+                        "uri": "${QUICKSTART_REPOSITORY_URL}"
+                    }
+                },
+                "strategy": {
+                    "type": "Source",
+                    "sourceStrategy": {
+                        "from": {
+                            "kind": "ImageStreamTag",
+                            "namespace": "openshift",
+                            "name": "php:${PHP_VERSION}"
+                        }
+                    }
+                },
+                "output": {
+                    "to": {
+                        "kind": "ImageStreamTag",
+                        "name": "${APPLICATION_NAME}-img:latest"
+                    },
+                    "imageLabels": [
+                        {
+                            "name": "io.k8s.display-name",
+                            "value": "WordPress"
+                        },
+                        {
+                            "name": "io.k8s.description",
+                            "value": "WordPress application and S2I builder."
+                        },
+                        {
+                            "name": "io.openshift.s2i.scripts-url",
+                            "value": "image:///opt/app-root/s2i"
+                        },
+                        {
+                            "name": "io.s2i.scripts-url",
+                            "value": "image:///opt/app-root/s2i"
+                        },
+                        {
+                            "name": "io.openshift.tags",
+                            "value": "builder,php,wordpress"
+                        }
+                    ]
+                }
+            }
+        },
         {
             "kind": "ImageStream",
             "apiVersion": "v1",
@@ -123,7 +203,7 @@
                 "source": {
                     "type": "Git",
                     "git": {
-                        "uri": "${SOURCE_REPOSITORY}",
+                        "uri": "${SOURCE_REPOSITORY_URL}",
                         "ref": "${SOURCE_REPOSITORY_TAG}"
                     }
                 },
@@ -132,7 +212,7 @@
                     "sourceStrategy": {
                         "from": {
                             "kind": "ImageStreamTag",
-                            "name": "${WORDPRESS_BUILDER_IMAGE}:latest"
+                            "name": "${APPLICATION_NAME}-s2i:latest"
                         }
                     }
                 },

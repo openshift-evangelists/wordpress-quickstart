@@ -45,9 +45,12 @@ mv /tmp/src/builder/assemble /opt/app-root/s2i/assemble
 mv /tmp/src/builder/run /opt/app-root/s2i/run
 mv /tmp/src/builder/save-artifacts /opt/app-root/s2i/save-artifacts
 
-mkdir -p /tmp/.s2i
-
-mv /tmp/src/builder/image_metadata.json /tmp/.s2i/image_metadata.json
+# XXX For now don't use image_metadata.json as not documented. Rely on
+# applying image labels from template used to run the builds.
+#
+# mkdir -p /tmp/.s2i
+#
+# mv /tmp/src/builder/image_metadata.json /tmp/.s2i/image_metadata.json
 
 rm -rf /tmp/src
 
