@@ -75,7 +75,7 @@ You can now log in to your WordPress instance and start using it.
 Plugin/Theme Development
 ------------------------
 
-If you implement your own plugins or themes for WordPress and have them in a hosted Git repository, you can have them automatically deployed with the WordPress site by using the _WordPress (Classic/Repository)_ template. You will be asked to provide a URL for a source repository containing your source code for the plugins and themes. Each time you make changes to your plugins or themes, you can trigger a new build of the WordPress site and they will copied into the site from the source code repository.
+If you implement your own plugins or themes for WordPress and have them in a hosted Git repository, you can have them automatically deployed with the WordPress site by using the _WordPress (Classic / Repository)_ template. You will be asked to provide a URL for a source repository containing your source code for the plugins and themes. Each time you make changes to your plugins or themes, you can trigger a new build of the WordPress site and they will copied into the site from the source code repository.
 
 Testing Environment
 -------------------
