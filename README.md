@@ -12,33 +12,10 @@ Fork this Repository First
 
 Before deploying WordPress using this repository, it is recommended that you fork it, then use your copy. This will ensure that you are using a stable version of the scripts and will not be affected by future changes made to this repository. You can update your fork from this repository later if you need future changes which may be made.
 
-To fork the repository, use the **Fork** button on the home page for this repository on GitHub.
-
-Creating the WordPress Image
-----------------------------
-
-The primary purpose of this source repository is to provide a way to build an image containing the bits required to run WordPress. The image created will fulfil two roles.
-
-The first is that the image can be deployed directly as is if it were an application image. In this case it will result in a self contained standalone WordPress instance.
-
-The second is to use the image as a S2I builder image. In this case a build would be run against a source repository containing plugins, themes and language files. These would be incorporated into the WordPress instance.
-
-The latter would be used where you have a need to develop your own plugins, themes and language files and want them under version control in a source repository.
-
-To create the WordPress image run the command:
-
-```
-oc new-build --name wordpress php:7.0~https://github.com/openshift-evangelists/wordpress-quickstart
-```
-
-In this example the URL of the original for this source repository is used. If you have created a fork of this repository, ensure you use the URL for your fork.
-
-This will by default create an image which uses the latest version of WordPress available. The version of PHP used is dictated by the version of the PHP S2I builder you supply to the ``oc new-build`` command.
+To fork the repository, use the **Fork** button on the home page for this repository on GitHub. After creating the fork, modify the templates and change the URL used in them to the repository for your fork. Alternatively, when using the templates, ensure you change the URL in the template parameter to be your fork.
 
 Loading the Templates
 ---------------------
-
-Although you can use the WordPress image directly, manually setting all the required environment variables and linking it to a database, it is easier to use the provided templates to deploy it.
 
 To load the templates into OpenShift from the command line you can run:
 
@@ -46,6 +23,8 @@ To load the templates into OpenShift from the command line you can run:
 oc create -f templates/classic-standalone.json
 oc create -f templates/classic-repository.json
 ```
+
+Alternatively, you can select _Add to Project_ in the OpenShift web console, then _Import YAML/JSON_, and upload the template or cut and paste it into the form. Skip processing the template immediately to load it into the service catalog. The following instructions assume you load it into the service catalog before using it.
 
 Deploying WordPress
 -------------------
@@ -92,6 +71,11 @@ Fill in your details and click on **Install WordPress**. You will receive confir
 ![Instance Created](./screenshots/wordpress-instance-created.png)
 
 You can now log in to your WordPress instance and start using it.
+
+Plugin/Theme Development
+------------------------
+
+If you implement your own plugins or themes for WordPress and have them in a hosted Git repository, you can have them automatically deployed with the WordPress site by using the _WordPress (Classic/Repository)_ template. You will be asked to provide a URL for a source repository containing your source code for the plugins and themes. Each time you make changes to your plugins or themes, you can trigger a new build of the WordPress site and they will copied into the site from the source code repository.
 
 Testing Environment
 -------------------
