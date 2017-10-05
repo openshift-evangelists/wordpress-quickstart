@@ -112,7 +112,7 @@
             "kind": "BuildConfig",
             "apiVersion": "v1",
             "metadata": {
-                "name": "${APPLICATION_NAME}",
+                "name": "${APPLICATION_NAME}-s2i",
                 "labels": {
                     "app": "${APPLICATION_NAME}"
                 }
