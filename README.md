@@ -77,6 +77,60 @@ Plugin/Theme Development
 
 If you implement your own plugins or themes for WordPress and have them in a hosted Git repository, you can have them automatically deployed with the WordPress site by using the _WordPress (Classic / Repository)_ template. You will be asked to provide a URL for a source repository containing your source code for the plugins and themes. Each time you make changes to your plugins or themes, you can trigger a new build of the WordPress site and they will copied into the site from the source code repository.
 
+Enabling WebDav Access
+----------------------
+
+If you are running a non-scaled WordPress instance, that is, with only one replica, you can enable WebDav access. Using WebDav, you can mount the code from the running container as a local filesystem. You can then use any tools running on your local computer to make edits to the application code for WordPress, including plugins and themes. This is useful for quick edits or where you are developing plugins or themes, and don't want to go through the full cycle of committing changes, pushing the changes to a hosted code repository and triggering a re-build of the application image to have the changes incorporated into your deployment.
+
+Before you can enable WebDav access, you need to create a user database file containing details of who can use the WebDav interface, and what the password is for that user.
+
+To create an initial user database file called ``webdav.htdigest``, run the command:
+
+```
+htdigest -c webdav.htdigest realm username
+```
+
+Replace ``realm`` with a name of your own choosing which will identify your site. Replace ``username`` with the name of a user. You will be prompted to enter the password for the user.
+
+Next you need to create a secret in OpenShift to hold the user database file and expose it to the WordPress application. Presuming the application name you gave your WordPress site when filling out the template was ``my-wordpress-site``, create the secret by running:
+
+```
+oc create secret generic my-wordpress-site-secrets --from-file=.htdigest=webdav.htdigest
+```
+
+Then mount the secret into the WordPress application by running:
+
+```
+oc set volume dc/my-wordpress-site --add --secret-name my-wordpress-site-secrets --mount-path /opt/app-root/secrets/webdav
+```
+
+This will result in the user database file being visible within the container at the path ``/opt/app-root/secrets/webdav/.htdigest``.
+
+With the user database in place, to enable WebDav access set the ``WEBDAV_AUTHENTICATION_REALM`` environment variable to be the same name as used for the ``realm`` when you ran ``htdigest`` to create the user database file.
+
+```
+oc set env dc/my-wordpress-site WEBDAV_AUTHENTICATION_REALM=realm
+```
+
+You can then mount the WebDav filesystem by using the same URL as your site is exposed as, but with ``/webdav/`` appended to the end of the URL.
+
+For example, on MacOS X, you could run:
+
+```
+mkdir my-wordpress-site
+mount_webdav -i https://hostname-of-your-wordpress-site/webdav/ my-wordpress-site
+```
+
+The directory needs to be created first as a mount point for the volume.
+
+You could instead use the _Finder_ in MacOS X and select _Go -> Connect to Server..._ and enter the URL there. The mounted volume would appear under ``/Volumes`` if your use the _Finder_.
+
+In either case, you should be prompted for the user name and password. Enter the same user name and password you used with the ``htdigest`` command.
+
+After being successfully mounted, changing to the directory, you should be able to view and edit files.
+
+Do note that speed of access to the volume will depend on whether the OpenShift cluster is local or remote, and in the case of it being remote, how fast your Internet connection is.
+
 Testing Environment
 -------------------
 
