@@ -83,6 +83,53 @@ if [ -f /opt/app-root/downloads/configs/.htaccess ]; then
     cp -f /opt/app-root/downloads/configs/.htaccess .htaccess
 fi
 
+# Enable WebDav access if authentication realm set and user database exists.
+
+if [ x"$WEBDAV_AUTHENTICATION_REALM" != x"" ]; then
+    if [ -f /opt/app-root/secrets/webdav/.htdigest ]; then
+        cat > /opt/app-root/etc/conf.d/90-webdav.conf << !
+<IfModule !dav_module>
+LoadModule dav_module modules/mod_dav.so'
+</IfModule>
+
+<IfModule !dav_fs_module>
+LoadModule dav_fs_module modules/mod_dav_fs.so'
+</IfModule>
+
+<IfModule !auth_digest_module>
+LoadModule auth_digest_module modules/mod_auth_digest.so'
+</IfModule>
+
+<IfModule !authn_file_module>
+LoadModule authn_file_module modules/mod_authn_file.so'
+</IfModule>
+
+<IfModule !authz_user_module>
+LoadModule authz_user_module modules/mod_authz_user.so'
+</IfModule>
+
+DavLockDB /opt/app-root/DavLock
+
+Alias /webdav/ /opt/app-root/src/
+
+<Location /webdav/>
+    DAV on
+
+    ForceType text/plain
+    DirectoryIndex disabled
+
+    AuthType Digest
+    AuthName $WEBDAV_AUTHENTICATION_REALM
+    AuthDigestDomain /webdav/
+    AuthDigestProvider file
+    AuthUserFile /opt/app-root/secrets/webdav/.htdigest
+
+    Require valid-user
+</Location>
+!
+    fi
+fi
+
 # Execute the original run script, replacing this script as current process.
 
 exec /usr/libexec/s2i/run
