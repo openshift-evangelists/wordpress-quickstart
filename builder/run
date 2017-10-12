@@ -119,7 +119,7 @@ Alias /webdav/ /opt/app-root/src/
     DirectoryIndex disabled
 
     AuthType Digest
-    AuthName $WEBDAV_AUTHENTICATION_REALM
+    AuthName "$WEBDAV_AUTHENTICATION_REALM"
     AuthDigestDomain /webdav/
     AuthDigestProvider file
     AuthUserFile /opt/app-root/secrets/webdav/.htdigest
