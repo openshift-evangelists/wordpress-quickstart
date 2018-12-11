@@ -21,7 +21,7 @@
         {
             "name": "QUICKSTART_REPOSITORY_URL",
             "description": "The URL of the quickstart Git repository.",
-            "value": "https://github.com/openshift-evangelists/wordpress-quickstart",
+            "value": "https://github.com/raatti/wordpress-quickstart",
             "required": true
         },
         {
@@ -238,7 +238,7 @@
 				    },
 				    "periodSeconds": 10,
 				    "successThreshold": 1,
-				    "timeoutSeconds": 1
+				    "timeoutSeconds": 90
 				},
 				"livenessProbe": {
 				    "failureThreshold": 3,
@@ -255,7 +255,7 @@
 				    },
 				    "periodSeconds": 10,
 				    "successThreshold": 1,
-				    "timeoutSeconds": 1
+				    "timeoutSeconds": 90
 				},
                                 "env": [
                                     {
@@ -302,7 +302,7 @@
 				    }
                                 },
 				"readinessProbe": {
-				  "timeoutSeconds": 1,
+				  "timeoutSeconds": 90,
 				  "initialDelaySeconds": 5,
 				  "exec": {
 				    "command": [ "/bin/sh", "-i", "-c",
@@ -310,7 +310,7 @@
 				  }
 				},
 				"livenessProbe": {
-				  "timeoutSeconds": 1,
+				  "timeoutSeconds": 90,
 				  "initialDelaySeconds": 30,
 				  "tcpSocket": {
 				    "port": 3306
