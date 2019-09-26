@@ -17,6 +17,9 @@ if [ -z "$WORDPRESS_INSTALL_VERSION" ]; then
   WORDPRESS_INSTALL_VERSION=$(curl -s "https://api.wordpress.org/core/version-check/1.7/?version=4.1" | python -c 'import sys, json; latest = json.load(sys.stdin)["offers"][0]; print(latest["version"] if latest["response"] == "upgrade" else "4.1")')
 fi
 
+
+
+
 # Download WordPress.
 
 mkdir -p /opt/app-root/downloads
@@ -33,7 +36,8 @@ if [ "${TARBALL_MD5}" != "${EXPECTS_MD5}" ]; then
     echo "ERROR: WordPress ${WORDPRESS_INSTALL_VERSION} MD5 checksum mismatch. The WordPress tar file that was downloaded does not match the signature that it was expected to have."
     exit 1
 fi
-
+mkdir -p /opt/app-root
+mv /tmp /opt/app-root
 # This S2I assemble script is only used when creating the custom image.
 # For when running the image, or using it as a S2I builder, we use a second
 # set of custom S2I scripts. We now need to move these into the correct
