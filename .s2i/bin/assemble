@@ -37,7 +37,7 @@ if [ "${TARBALL_MD5}" != "${EXPECTS_MD5}" ]; then
     exit 1
 fi
 mkdir -p /opt/app-root/tmp
-cp /tmp/src /opt/app-root/tmp
+cp -f /tmp /opt/app-root/tmp/ -R
 # This S2I assemble script is only used when creating the custom image.
 # For when running the image, or using it as a S2I builder, we use a second
 # set of custom S2I scripts. We now need to move these into the correct
