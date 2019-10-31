@@ -77,6 +77,10 @@
             "description": "The version of the PHP builder.",
             "value": "7.0",
             "required": true
+        },
+        {
+            "name": "WORDPRESS_INSTALL_VERSION",
+            "description": "The version of the Wordpress, for example, \"4.9\" or \"4.9.12\". Leave blank for the latest."
         }
     ],
     "objects": [
@@ -121,7 +125,13 @@
                             "kind": "ImageStreamTag",
                             "namespace": "openshift",
                             "name": "php:${PHP_VERSION}"
-                        }
+                        },
+                        "env": [
+                            {
+                               "name": "WORDPRESS_INSTALL_VERSION",
+                               "value": "${WORDPRESS_INSTALL_VERSION}"
+                            }
+                        ]
                     }
                 },
                 "output": {
