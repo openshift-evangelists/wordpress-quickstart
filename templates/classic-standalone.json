@@ -81,7 +81,7 @@
         {
             "name": "PHP_VERSION",
             "description": "The version of the PHP builder.",
-            "value": "7.0",
+            "value": "7.3",
             "required": true
         }
     ],
