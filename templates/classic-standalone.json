@@ -75,7 +75,7 @@
         {
             "name": "MYSQL_VERSION",
             "description": "The version of the MySQL database.",
-            "value": "5.7",
+            "value": "latest",
             "required": true
         },
         {
