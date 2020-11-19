@@ -21,7 +21,7 @@
         {
             "name": "QUICKSTART_REPOSITORY_URL",
             "description": "The URL of the quickstart Git repository.",
-            "value": "https://github.com/openshift-evangelists/wordpress-quickstart",
+            "value": "https://github.com/mschindl/wordpress-quickstart",
             "required": true
         },
         {
