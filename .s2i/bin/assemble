@@ -14,7 +14,7 @@ set -eo pipefail
 # Use latest stable version of WordPress if no version is specified.
 
 if [ -z "$WORDPRESS_INSTALL_VERSION" ]; then
-  WORDPRESS_INSTALL_VERSION=$(curl -s "https://api.wordpress.org/core/version-check/1.7/?version=4.1" | python -c 'import sys, json; latest = json.load(sys.stdin)["offers"][0]; print(latest["version"] if latest["response"] == "upgrade" else "4.1")')
+  WORDPRESS_INSTALL_VERSION=$(curl -s "https://api.wordpress.org/core/version-check/1.7/?version=5.5.3" | python -c 'import sys, json; latest = json.load(sys.stdin)["offers"][0]; print(latest["version"] if latest["response"] == "upgrade" else "5.5.3")')
 fi
 
 # Download WordPress.
